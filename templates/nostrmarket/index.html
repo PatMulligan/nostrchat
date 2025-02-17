@@ -42,31 +42,6 @@
           </div>
         </q-card-section>
       </q-card>
-      <q-card class="q-mt-lg">
-        <q-card-section>
-          <stall-list
-            :adminkey="g.user.wallets[0].adminkey"
-            :inkey="g.user.wallets[0].inkey"
-            :wallet-options="g.user.walletOptions"
-            @customer-selected-for-order="customerSelectedForOrder"
-          ></stall-list>
-        </q-card-section>
-      </q-card>
-      <q-card class="q-mt-lg">
-        <q-card-section>
-          <div class="row">
-            <div class="col-12">
-              <order-list
-                ref="orderListRef"
-                :adminkey="g.user.wallets[0].adminkey"
-                :inkey="g.user.wallets[0].inkey"
-                :customer-pubkey-filter="orderPubkey"
-                @customer-selected="customerSelectedForOrder"
-              ></order-list>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card>
     </div>
     <q-card v-else>
       <q-card-section>
