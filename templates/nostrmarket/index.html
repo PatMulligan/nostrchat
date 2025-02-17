@@ -42,6 +42,19 @@
           </div>
         </q-card-section>
       </q-card>
+
+    <div v-if="merchant && merchant.id" class="col-12">
+      <direct-messages
+        ref="directMessagesRef"
+        :inkey="g.user.wallets[0].inkey"
+        :adminkey="g.user.wallets[0].adminkey"
+        :active-chat-customer="activeChatCustomer"
+        :merchant-id="merchant.id"
+        @customer-selected="filterOrdersForCustomer"
+        @order-selected="showOrderDetails"
+      >
+      </direct-messages>
+    </div>
     </div>
     <q-card v-else>
       <q-card-section>
@@ -128,18 +141,6 @@
         </q-card-section>
       </q-card>
     </div>
-    <div v-if="merchant && merchant.id" class="col-12">
-      <direct-messages
-        ref="directMessagesRef"
-        :inkey="g.user.wallets[0].inkey"
-        :adminkey="g.user.wallets[0].adminkey"
-        :active-chat-customer="activeChatCustomer"
-        :merchant-id="merchant.id"
-        @customer-selected="filterOrdersForCustomer"
-        @order-selected="showOrderDetails"
-      >
-      </direct-messages>
-    </div>
   </div>
 
   <div>
@@ -190,18 +191,7 @@
 <template id="key-pair"
   >{% include("nostrmarket/components/key-pair.html") %}</template
 >
-<template id="shipping-zones"
-  >{% include("nostrmarket/components/shipping-zones.html") %}</template
->
-<template id="stall-details"
-  >{% include("nostrmarket/components/stall-details.html") %}</template
->
-<template id="stall-list"
-  >{% include("nostrmarket/components/stall-list.html") %}</template
->
-<template id="order-list"
-  >{% include("nostrmarket/components/order-list.html") %}</template
-><template id="direct-messages"
+<template id="direct-messages"
   >{% include("nostrmarket/components/direct-messages.html") %}</template
 >
 
@@ -214,10 +204,6 @@
 <script src="{{ url_for('nostrmarket_static', path='js/index.js') }}"></script>
 
 <script src="{{ static_url_for('nostrmarket/static', 'components/key-pair.js') }}"></script>
-<script src="{{ static_url_for('nostrmarket/static', 'components/shipping-zones.js') }}"></script>
-<script src="{{ static_url_for('nostrmarket/static', 'components/stall-details.js') }}"></script>
-<script src="{{ static_url_for('nostrmarket/static', 'components/stall-list.js') }}"></script>
-<script src="{{ static_url_for('nostrmarket/static', 'components/order-list.js') }}"></script>
 <script src="{{ static_url_for('nostrmarket/static', 'components/direct-messages.js') }}"></script>
 <script src="{{ static_url_for('nostrmarket/static', 'components/merchant-details.js') }}"></script>
 
