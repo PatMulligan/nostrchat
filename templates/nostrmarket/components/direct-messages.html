@@ -52,36 +52,39 @@
               :bg-color="dm.incoming ? 'white' : 'light-green-2'"
               :class="'chat-mesage-index-'+index"
             >
-              <div v-if="dm.isJson">
-                <div v-if="dm.message.type === 0">
-                  <strong>New order:</strong>
-                </div>
-                <div v-else-if="dm.message.type === 1">
-                  <strong>Reply sent for order: </strong>
-                </div>
-                <div v-else-if="dm.message.type === 2">
-                  <q-badge v-if="dm.message.paid" color="green">Paid </q-badge>
-                  <q-badge v-if="dm.message.shipped" color="green"
-                    >Shipped
-                  </q-badge>
-                </div>
-                <div>
-                  <span v-text="dm.message.message"></span>
-                  <q-badge color="orange">
-                    <span
-                      v-text="dm.message.id"
-                      @click="showOrderDetails(dm.message.id, dm.event_id)"
-                      class="cursor-pointer"
-                    ></span>
-                  </q-badge>
-                </div>
-                <q-badge
-                  @click="showMessageRawData(index)"
-                  class="cursor-pointer"
-                  >...</q-badge
-                >
-              </div>
-              <div v-else><span v-text="dm.message"></span></div>
+              <!-- Leaving future reference to implement enums -->
+
+              <!-- <div v-if="dm.isJson"> -->
+              <!--   <div v-if="dm.message.type === 0"> -->
+              <!--     <strong>New order:</strong> -->
+              <!--   </div> -->
+              <!--   <div v-else-if="dm.message.type === 1"> -->
+              <!--     <strong>Reply sent for order: </strong> -->
+              <!--   </div> -->
+              <!--   <div v-else-if="dm.message.type === 2"> -->
+              <!--     <q-badge v-if="dm.message.paid" color="green">Paid </q-badge> -->
+              <!--     <q-badge v-if="dm.message.shipped" color="green" -->
+              <!--       >Shipped -->
+              <!--     </q-badge> -->
+              <!--   </div> -->
+              <!--   <div> -->
+              <!--     <span v-text="dm.message.message"></span> -->
+              <!--     <q-badge color="orange"> -->
+              <!--       <span -->
+              <!--         v-text="dm.message.id" -->
+              <!--         @click="showOrderDetails(dm.message.id, dm.event_id)" -->
+              <!--         class="cursor-pointer" -->
+              <!--       ></span> -->
+              <!--     </q-badge> -->
+              <!--   </div> -->
+              <!--   <q-badge -->
+              <!--     @click="showMessageRawData(index)" -->
+              <!--     class="cursor-pointer" -->
+              <!--     >...</q-badge -->
+              <!--   > -->
+              <!-- </div> -->
+              <!-- <div v-else><span v-text="dm.message"></span></div> -->
+              <div><span v-text="dm.message"></span></div>
             </q-chat-message>
           </div>
         </div>
