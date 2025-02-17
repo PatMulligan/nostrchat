@@ -9,7 +9,8 @@ async def m001_initial(db):
             id TEXT PRIMARY KEY,
             private_key TEXT NOT NULL,
             public_key TEXT NOT NULL,
-            meta TEXT NOT NULL DEFAULT '{}'
+            meta TEXT NOT NULL DEFAULT '{}',
+            time TIMESTAMP
         );
         """
     )
@@ -28,6 +29,7 @@ async def m001_initial(db):
             public_key TEXT NOT NULL,
             incoming BOOLEAN NOT NULL DEFAULT false,
             time TIMESTAMP NOT NULL DEFAULT {db.timestamp_now},
+            type INTEGER NOT NULL DEFAULT -1,
             UNIQUE(event_id)
         );
         """
@@ -61,16 +63,4 @@ async def m001_initial(db):
         );
         """
     )
-
-
-async def m003_update_direct_message_type(db):
-    await db.execute(
-        """
-        ALTER TABLE nostrmarket.direct_messages
-        ADD COLUMN type INTEGER NOT NULL DEFAULT -1;
-        """
-    )
-
-async def m004_add_merchant_timestamp(db):
-    await db.execute("ALTER TABLE nostrmarket.merchants ADD COLUMN time TIMESTAMP;")
 
