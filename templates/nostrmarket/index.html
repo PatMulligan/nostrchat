@@ -16,27 +16,6 @@
                 @merchant-deleted="handleMerchantDeleted"
               ></merchant-details>
             </div>
-            <div class="col-6">
-              <q-toggle
-                @update:model-value="toggleMerchantState()"
-                size="md"
-                checked-icon="check"
-                v-model="merchant.config.active"
-                color="primary"
-                unchecked-icon="clear"
-                class="float-left"
-              />
-              <span
-                v-text="merchant.config.active ? 'Accepting Orders': 'Orders Paused'"
-              ></span>
-            </div>
-            <div class="col-2">
-              <shipping-zones
-                :inkey="g.user.wallets[0].inkey"
-                :adminkey="g.user.wallets[0].adminkey"
-                class="float-right"
-              ></shipping-zones>
-            </div>
           </div>
         </q-card-section>
         <q-card-section v-if="showKeys">
