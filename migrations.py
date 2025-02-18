@@ -1,10 +1,10 @@
 async def m001_initial(db):
     """
-    Initial merchants table.
+    Initial nostraccts table.
     """
     await db.execute(
         """
-        CREATE TABLE nostrmarket.merchants (
+        CREATE TABLE nostrmarket.nostraccts (
             user_id TEXT NOT NULL,
             id TEXT PRIMARY KEY,
             private_key TEXT NOT NULL,
@@ -21,7 +21,7 @@ async def m001_initial(db):
     await db.execute(
         f"""
         CREATE TABLE nostrmarket.direct_messages (
-            merchant_id TEXT NOT NULL,
+            nostracct_id TEXT NOT NULL,
             id TEXT PRIMARY KEY,
             event_id TEXT,
             event_created_at INTEGER NOT NULL,
@@ -55,7 +55,7 @@ async def m001_initial(db):
     await db.execute(
         """
         CREATE TABLE nostrmarket.customers (
-            merchant_id TEXT NOT NULL,
+            nostracct_id TEXT NOT NULL,
             public_key TEXT NOT NULL,
             event_created_at INTEGER,
             unread_messages INTEGER NOT NULL DEFAULT 1,

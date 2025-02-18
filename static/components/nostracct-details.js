@@ -1,7 +1,7 @@
-window.app.component('merchant-details', {
-  name: 'merchant-details',
-  template: '#merchant-details',
-  props: ['merchant-id', 'adminkey', 'inkey', 'showKeys'],
+window.app.component('nostracct-details', {
+  name: 'nostracct-details',
+  template: '#nostracct-details',
+  props: ['nostracct-id', 'adminkey', 'inkey', 'showKeys'],
   delimiters: ['${', '}'],
   data: function () {
     return {}
@@ -11,16 +11,16 @@ window.app.component('merchant-details', {
       this.$emit('toggle-show-keys')
     },
 
-    republishMerchantData: async function () {
+    republishNostrAcctData: async function () {
       try {
         await LNbits.api.request(
           'PUT',
-          `/nostrmarket/api/v1/merchant/${this.merchantId}/nostr`,
+          `/nostrmarket/api/v1/nostracct/${this.nostracctId}/nostr`,
           this.adminkey
         )
         this.$q.notify({
           type: 'positive',
-          message: 'Merchant data republished to Nostr',
+          message: 'NostrAcct data republished to Nostr',
           timeout: 5000
         })
       } catch (error) {
@@ -28,16 +28,16 @@ window.app.component('merchant-details', {
         LNbits.utils.notifyApiError(error)
       }
     },
-    requeryMerchantData: async function () {
+    requeryNostrAcctData: async function () {
       try {
         await LNbits.api.request(
           'GET',
-          `/nostrmarket/api/v1/merchant/${this.merchantId}/nostr`,
+          `/nostrmarket/api/v1/nostracct/${this.nostracctId}/nostr`,
           this.adminkey
         )
         this.$q.notify({
           type: 'positive',
-          message: 'Merchant data refreshed from Nostr',
+          message: 'NostrAcct data refreshed from Nostr',
           timeout: 5000
         })
       } catch (error) {
@@ -45,25 +45,25 @@ window.app.component('merchant-details', {
         LNbits.utils.notifyApiError(error)
       }
     },
-    deleteMerchantTables: function () {
+    deleteNostrAcctTables: function () {
       LNbits.utils
         .confirmDialog(
           `
              Stalls, products and orders will be deleted also!
-             Are you sure you want to delete this merchant?
+             Are you sure you want to delete this nostracct?
             `
         )
         .onOk(async () => {
           try {
             await LNbits.api.request(
               'DELETE',
-              '/nostrmarket/api/v1/merchant/' + this.merchantId,
+              '/nostrmarket/api/v1/nostracct/' + this.nostracctId,
               this.adminkey
             )
-            this.$emit('merchant-deleted', this.merchantId)
+            this.$emit('nostracct-deleted', this.nostracctId)
             this.$q.notify({
               type: 'positive',
-              message: 'Merchant Deleted',
+              message: 'NostrAcct Deleted',
               timeout: 5000
             })
           } catch (error) {
@@ -72,23 +72,23 @@ window.app.component('merchant-details', {
           }
         })
     },
-    deleteMerchantFromNostr: function () {
+    deleteNostrAcctFromNostr: function () {
       LNbits.utils
         .confirmDialog(
           `
-             Do you want to remove the merchant from Nostr?
+             Do you want to remove the nostracct from Nostr?
             `
         )
         .onOk(async () => {
           try {
             await LNbits.api.request(
               'DELETE',
-              `/nostrmarket/api/v1/merchant/${this.merchantId}/nostr`,
+              `/nostrmarket/api/v1/nostracct/${this.nostracctId}/nostr`,
               this.adminkey
             )
             this.$q.notify({
               type: 'positive',
-              message: 'Merchant Deleted from Nostr',
+              message: 'NostrAcct Deleted from Nostr',
               timeout: 5000
             })
           } catch (error) {

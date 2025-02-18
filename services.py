@@ -14,8 +14,8 @@ from .crud import (
     create_direct_message,
     get_customer,
     get_last_direct_messages_created_at,
-    get_merchant_by_pubkey,
-    get_merchants_ids_with_pubkeys,
+    get_nostracct_by_pubkey,
+    get_nostraccts_ids_with_pubkeys,
     increment_customer_unread_messages,
     update_customer_profile,
 )
@@ -23,45 +23,45 @@ from .models import (
     Customer,
     DirectMessage,
     DirectMessageType,
-    Merchant,
+    NostrAcct,
     Nostrable,
     PartialDirectMessage,
 )
 from .nostr.event import NostrEvent
 
-async def update_merchant_to_nostr(
-    merchant: Merchant, delete_merchant=False
-) -> Merchant:
+async def update_nostracct_to_nostr(
+    nostracct: NostrAcct, delete_nostracct=False
+) -> NostrAcct:
     event: Optional[NostrEvent] = None
-    if delete_merchant:
-        # merchant profile updates not supported yet
-        event = await sign_and_send_to_nostr(merchant, merchant, delete_merchant)
+    if delete_nostracct:
+        # nostracct profile updates not supported yet
+        event = await sign_and_send_to_nostr(nostracct, nostracct, delete_nostracct)
     assert event
-    merchant.config.event_id = event.id
-    return merchant
+    nostracct.config.event_id = event.id
+    return nostracct
 
 
 async def sign_and_send_to_nostr(
-    merchant: Merchant, n: Nostrable, delete=False
+    nostracct: NostrAcct, n: Nostrable, delete=False
 ) -> NostrEvent:
     event = (
-        n.to_nostr_delete_event(merchant.public_key)
+        n.to_nostr_delete_event(nostracct.public_key)
         if delete
-        else n.to_nostr_event(merchant.public_key)
+        else n.to_nostr_event(nostracct.public_key)
     )
-    event.sig = merchant.sign_hash(bytes.fromhex(event.id))
+    event.sig = nostracct.sign_hash(bytes.fromhex(event.id))
     await nostr_client.publish_nostr_event(event)
 
     return event
 
 
 async def send_dm(
-    merchant: Merchant,
+    nostracct: NostrAcct,
     other_pubkey: str,
     type_: int,
     dm_content: str,
 ):
-    dm_event = merchant.build_dm_event(dm_content, other_pubkey)
+    dm_event = nostracct.build_dm_event(dm_content, other_pubkey)
 
     dm = PartialDirectMessage(
         event_id=dm_event.id,
@@ -70,12 +70,12 @@ async def send_dm(
         public_key=other_pubkey,
         type=type_,
     )
-    dm_reply = await create_direct_message(merchant.id, dm)
+    dm_reply = await create_direct_message(nostracct.id, dm)
 
     await nostr_client.publish_nostr_event(dm_event)
 
     await websocket_updater(
-        merchant.id,
+        nostracct.id,
         json.dumps(
             {
                 "type": f"dm:{dm.type}",
@@ -103,42 +103,42 @@ async def process_nostr_message(msg: str):
         logger.debug(ex)
 
 async def _handle_nip04_message(event: NostrEvent):
-    merchant_public_key = event.pubkey
-    merchant = await get_merchant_by_pubkey(merchant_public_key)
+    nostracct_public_key = event.pubkey
+    nostracct = await get_nostracct_by_pubkey(nostracct_public_key)
 
-    if not merchant:
+    if not nostracct:
         p_tags = event.tag_values("p")
         if len(p_tags) and p_tags[0]:
-            merchant_public_key = p_tags[0]
-            merchant = await get_merchant_by_pubkey(merchant_public_key)
+            nostracct_public_key = p_tags[0]
+            nostracct = await get_nostracct_by_pubkey(nostracct_public_key)
 
-    assert merchant, f"Merchant not found for public key '{merchant_public_key}'"
+    assert nostracct, f"NostrAcct not found for public key '{nostracct_public_key}'"
 
-    if event.pubkey == merchant_public_key:
+    if event.pubkey == nostracct_public_key:
         assert len(event.tag_values("p")) != 0, "Outgong message has no 'p' tag"
-        clear_text_msg = merchant.decrypt_message(
+        clear_text_msg = nostracct.decrypt_message(
             event.content, event.tag_values("p")[0]
         )
-        await _handle_outgoing_dms(event, merchant, clear_text_msg)
-    elif event.has_tag_value("p", merchant_public_key):
-        clear_text_msg = merchant.decrypt_message(event.content, event.pubkey)
-        await _handle_incoming_dms(event, merchant, clear_text_msg)
+        await _handle_outgoing_dms(event, nostracct, clear_text_msg)
+    elif event.has_tag_value("p", nostracct_public_key):
+        clear_text_msg = nostracct.decrypt_message(event.content, event.pubkey)
+        await _handle_incoming_dms(event, nostracct, clear_text_msg)
     else:
         logger.warning(f"Bad NIP04 event: '{event.id}'")
 
 
 async def _handle_incoming_dms(
-    event: NostrEvent, merchant: Merchant, clear_text_msg: str
+    event: NostrEvent, nostracct: NostrAcct, clear_text_msg: str
 ):
-    customer = await get_customer(merchant.id, event.pubkey)
+    customer = await get_customer(nostracct.id, event.pubkey)
     if not customer:
-        await _handle_new_customer(event, merchant)
+        await _handle_new_customer(event, nostracct)
     else:
-        await increment_customer_unread_messages(merchant.id, event.pubkey)
+        await increment_customer_unread_messages(nostracct.id, event.pubkey)
 
     dm_type, json_data = PartialDirectMessage.parse_message(clear_text_msg)
     new_dm = await _persist_dm(
-        merchant.id,
+        nostracct.id,
         dm_type.value,
         event.pubkey,
         event.id,
@@ -149,16 +149,16 @@ async def _handle_incoming_dms(
     # TODO: comment out for now
     # if json_data:
     #     reply_type, dm_reply = await _handle_incoming_structured_dm(
-    #         merchant, new_dm, json_data
+    #         nostracct, new_dm, json_data
     #     )
     #     if dm_reply:
     #         await reply_to_structured_dm(
-    #             merchant, event.pubkey, reply_type.value, dm_reply
+    #             nostracct, event.pubkey, reply_type.value, dm_reply
     #         )
 
 
 async def _handle_outgoing_dms(
-    event: NostrEvent, merchant: Merchant, clear_text_msg: str
+    event: NostrEvent, nostracct: NostrAcct, clear_text_msg: str
 ):
     sent_to = event.tag_values("p")
     type_, _ = PartialDirectMessage.parse_message(clear_text_msg)
@@ -170,17 +170,17 @@ async def _handle_outgoing_dms(
             public_key=sent_to[0],
             type=type_.value,
         )
-        await create_direct_message(merchant.id, dm)
+        await create_direct_message(nostracct.id, dm)
 
 
 # TODO: comment out for now
 # async def _handle_incoming_structured_dm(
-#     merchant: Merchant, dm: DirectMessage, json_data: dict
+#     nostracct: NostrAcct, dm: DirectMessage, json_data: dict
 # ) -> Tuple[DirectMessageType, Optional[str]]:
 #     try:
-#         if dm.type == DirectMessageType.CUSTOMER_ORDER.value and merchant.config.active:
+#         if dm.type == DirectMessageType.CUSTOMER_ORDER.value and nostracct.config.active:
 #             json_resp = await _handle_new_order(
-#                 merchant.id, merchant.public_key, dm, json_data
+#                 nostracct.id, nostracct.public_key, dm, json_data
 #             )
 #
 #             return DirectMessageType.PAYMENT_REQUEST, json_resp
@@ -192,7 +192,7 @@ async def _handle_outgoing_dms(
 
 
 async def _persist_dm(
-    merchant_id: str,
+    nostracct_id: str,
     dm_type: int,
     from_pubkey: str,
     event_id: str,
@@ -207,10 +207,10 @@ async def _persist_dm(
         incoming=True,
         type=dm_type,
     )
-    new_dm = await create_direct_message(merchant_id, dm)
+    new_dm = await create_direct_message(nostracct_id, dm)
 
     await websocket_updater(
-        merchant_id,
+        nostracct_id,
         json.dumps(
             {
                 "type": f"dm:{dm_type}",
@@ -223,9 +223,9 @@ async def _persist_dm(
 
 
 async def reply_to_structured_dm(
-    merchant: Merchant, customer_pubkey: str, dm_type: int, dm_reply: str
+    nostracct: NostrAcct, customer_pubkey: str, dm_type: int, dm_reply: str
 ):
-    dm_event = merchant.build_dm_event(dm_reply, customer_pubkey)
+    dm_event = nostracct.build_dm_event(dm_reply, customer_pubkey)
     dm = PartialDirectMessage(
         event_id=dm_event.id,
         event_created_at=dm_event.created_at,
@@ -233,37 +233,37 @@ async def reply_to_structured_dm(
         public_key=customer_pubkey,
         type=dm_type,
     )
-    await create_direct_message(merchant.id, dm)
+    await create_direct_message(nostracct.id, dm)
     await nostr_client.publish_nostr_event(dm_event)
 
     await websocket_updater(
-        merchant.id,
+        nostracct.id,
         json.dumps(
             {"type": f"dm:{dm_type}", "customerPubkey": dm.public_key, "dm": dm.dict()}
         ),
     )
 
-async def resubscribe_to_all_merchants():
-    await nostr_client.unsubscribe_merchants()
+async def resubscribe_to_all_nostraccts():
+    await nostr_client.unsubscribe_nostraccts()
     # give some time for the message to propagate
     await asyncio.sleep(1)
-    await subscribe_to_all_merchants()
+    await subscribe_to_all_nostraccts()
 
 
-async def subscribe_to_all_merchants():
-    ids = await get_merchants_ids_with_pubkeys()
+async def subscribe_to_all_nostraccts():
+    ids = await get_nostraccts_ids_with_pubkeys()
     public_keys = [pk for _, pk in ids]
 
     last_dm_time = await get_last_direct_messages_created_at()
 
-    await nostr_client.subscribe_merchants(
+    await nostr_client.subscribe_nostraccts(
         public_keys, last_dm_time, 0
     )
 
 
-async def _handle_new_customer(event: NostrEvent, merchant: Merchant):
+async def _handle_new_customer(event: NostrEvent, nostracct: NostrAcct):
     await create_customer(
-        merchant.id, Customer(merchant_id=merchant.id, public_key=event.pubkey)
+        nostracct.id, Customer(nostracct_id=nostracct.id, public_key=event.pubkey)
     )
     await nostr_client.user_profile_temp_subscribe(event.pubkey)
 

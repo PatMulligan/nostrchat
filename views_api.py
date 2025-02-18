@@ -18,56 +18,56 @@ from . import nostr_client, nostrmarket_ext
 from .crud import (
     create_customer,
     create_direct_message,
-    create_merchant,
-    delete_merchant,
-    delete_merchant_direct_messages,
+    create_nostracct,
+    delete_nostracct,
+    delete_nostracct_direct_messages,
     get_customer,
     get_customers,
     get_direct_messages,
     get_last_direct_messages_time,
-    get_merchant_by_pubkey,
-    get_merchant_for_user,
-    touch_merchant,
+    get_nostracct_by_pubkey,
+    get_nostracct_for_user,
+    touch_nostracct,
     update_customer_no_unread_messages,
-    update_merchant,
+    update_nostracct,
 )
 from .helpers import normalize_public_key
 from .models import (
     Customer,
     DirectMessage,
-    Merchant,
+    NostrAcct,
     PartialDirectMessage,
-    PartialMerchant,
+    PartialNostrAcct,
 )
 from .services import (
-    resubscribe_to_all_merchants,
-    subscribe_to_all_merchants,
-    update_merchant_to_nostr,
+    resubscribe_to_all_nostraccts,
+    subscribe_to_all_nostraccts,
+    update_nostracct_to_nostr,
 )
 
 ######################################## MERCHANT ######################################
 
 
-@nostrmarket_ext.post("/api/v1/merchant")
-async def api_create_merchant(
-    data: PartialMerchant,
+@nostrmarket_ext.post("/api/v1/nostracct")
+async def api_create_nostracct(
+    data: PartialNostrAcct,
     wallet: WalletTypeInfo = Depends(require_admin_key),
-) -> Merchant:
+) -> NostrAcct:
 
     try:
-        merchant = await get_merchant_by_pubkey(data.public_key)
-        assert merchant is None, "A merchant already uses this public key"
+        nostracct = await get_nostracct_by_pubkey(data.public_key)
+        assert nostracct is None, "A nostracct already uses this public key"
 
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant is None, "A merchant already exists for this user"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct is None, "A nostracct already exists for this user"
 
-        merchant = await create_merchant(wallet.wallet.user, data)
+        nostracct = await create_nostracct(wallet.wallet.user, data)
 
-        await resubscribe_to_all_merchants()
+        await resubscribe_to_all_nostraccts()
 
-        await nostr_client.merchant_temp_subscription(data.public_key)
+        await nostr_client.nostracct_temp_subscription(data.public_key)
 
-        return merchant
+        return nostracct
     except AssertionError as ex:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
@@ -77,50 +77,50 @@ async def api_create_merchant(
         logger.warning(ex)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot create merchant",
+            detail="Cannot create nostracct",
         ) from ex
 
 
-@nostrmarket_ext.get("/api/v1/merchant")
-async def api_get_merchant(
+@nostrmarket_ext.get("/api/v1/nostracct")
+async def api_get_nostracct(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
-) -> Optional[Merchant]:
+) -> Optional[NostrAcct]:
 
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        if not merchant:
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        if not nostracct:
             return None
 
-        merchant = await touch_merchant(wallet.wallet.user, merchant.id)
-        assert merchant
-        last_dm_time = await get_last_direct_messages_time(merchant.id)
-        assert merchant.time
-        merchant.config.restore_in_progress = (merchant.time - last_dm_time) < 30
+        nostracct = await touch_nostracct(wallet.wallet.user, nostracct.id)
+        assert nostracct
+        last_dm_time = await get_last_direct_messages_time(nostracct.id)
+        assert nostracct.time
+        nostracct.config.restore_in_progress = (nostracct.time - last_dm_time) < 30
 
-        return merchant
+        return nostracct
     except Exception as ex:
         logger.warning(ex)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot get merchant",
+            detail="Cannot get nostracct",
         ) from ex
 
 
-@nostrmarket_ext.delete("/api/v1/merchant/{merchant_id}")
-async def api_delete_merchant(
-    merchant_id: str,
+@nostrmarket_ext.delete("/api/v1/nostracct/{nostracct_id}")
+async def api_delete_nostracct(
+    nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
 ):
 
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
-        assert merchant.id == merchant_id, "Wrong merchant ID"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
+        assert nostracct.id == nostracct_id, "Wrong nostracct ID"
 
-        await nostr_client.unsubscribe_merchants()
+        await nostr_client.unsubscribe_nostraccts()
 
-        await delete_merchant_direct_messages(merchant.id)
-        await delete_merchant(merchant.id)
+        await delete_nostracct_direct_messages(nostracct.id)
+        await delete_nostracct(nostracct.id)
 
     except AssertionError as ex:
         raise HTTPException(
@@ -131,24 +131,24 @@ async def api_delete_merchant(
         logger.warning(ex)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot get merchant",
+            detail="Cannot get nostracct",
         ) from ex
     finally:
-        await subscribe_to_all_merchants()
+        await subscribe_to_all_nostraccts()
 
 
-@nostrmarket_ext.put("/api/v1/merchant/{merchant_id}/nostr")
-async def api_republish_merchant(
-    merchant_id: str,
+@nostrmarket_ext.put("/api/v1/nostracct/{nostracct_id}/nostr")
+async def api_republish_nostracct(
+    nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
 ):
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
-        assert merchant.id == merchant_id, "Wrong merchant ID"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
+        assert nostracct.id == nostracct_id, "Wrong nostracct ID"
 
-        merchant = await update_merchant_to_nostr(merchant)
-        await update_merchant(wallet.wallet.user, merchant.id, merchant.config)
+        nostracct = await update_nostracct_to_nostr(nostracct)
+        await update_nostracct(wallet.wallet.user, nostracct.id, nostracct.config)
 
     except AssertionError as ex:
         raise HTTPException(
@@ -163,17 +163,17 @@ async def api_republish_merchant(
         ) from ex
 
 
-@nostrmarket_ext.get("/api/v1/merchant/{merchant_id}/nostr")
-async def api_refresh_merchant(
-    merchant_id: str,
+@nostrmarket_ext.get("/api/v1/nostracct/{nostracct_id}/nostr")
+async def api_refresh_nostracct(
+    nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
 ):
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
-        assert merchant.id == merchant_id, "Wrong merchant ID"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
+        assert nostracct.id == nostracct_id, "Wrong nostracct ID"
 
-        await nostr_client.merchant_temp_subscription(merchant.public_key)
+        await nostr_client.nostracct_temp_subscription(nostracct.public_key)
 
     except AssertionError as ex:
         raise HTTPException(
@@ -188,20 +188,20 @@ async def api_refresh_merchant(
         ) from ex
 
 
-@nostrmarket_ext.put("/api/v1/merchant/{merchant_id}/toggle")
-async def api_toggle_merchant(
-    merchant_id: str,
+@nostrmarket_ext.put("/api/v1/nostracct/{nostracct_id}/toggle")
+async def api_toggle_nostracct(
+    nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
-) -> Merchant:
+) -> NostrAcct:
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
-        assert merchant.id == merchant_id, "Wrong merchant ID"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
+        assert nostracct.id == nostracct_id, "Wrong nostracct ID"
 
-        merchant.config.active = not merchant.config.active
-        await update_merchant(wallet.wallet.user, merchant.id, merchant.config)
+        nostracct.config.active = not nostracct.config.active
+        await update_nostracct(wallet.wallet.user, nostracct.id, nostracct.config)
 
-        return merchant
+        return nostracct
     except AssertionError as ex:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
@@ -211,22 +211,22 @@ async def api_toggle_merchant(
         logger.warning(ex)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot get merchant",
+            detail="Cannot get nostracct",
         ) from ex
 
 
-@nostrmarket_ext.delete("/api/v1/merchant/{merchant_id}/nostr")
-async def api_delete_merchant_on_nostr(
-    merchant_id: str,
+@nostrmarket_ext.delete("/api/v1/nostracct/{nostracct_id}/nostr")
+async def api_delete_nostracct_on_nostr(
+    nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
 ):
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
-        assert merchant.id == merchant_id, "Wrong merchant ID"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
+        assert nostracct.id == nostracct_id, "Wrong nostracct ID"
 
-        merchant = await update_merchant_to_nostr(merchant, True)
-        await update_merchant(wallet.wallet.user, merchant.id, merchant.config)
+        nostracct = await update_nostracct_to_nostr(nostracct, True)
+        await update_nostracct(wallet.wallet.user, nostracct.id, nostracct.config)
 
     except AssertionError as ex:
         raise HTTPException(
@@ -237,7 +237,7 @@ async def api_delete_merchant_on_nostr(
         logger.warning(ex)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot get merchant",
+            detail="Cannot get nostracct",
         ) from ex
 
 
@@ -249,11 +249,11 @@ async def api_get_messages(
     public_key: str, wallet: WalletTypeInfo = Depends(require_invoice_key)
 ) -> List[DirectMessage]:
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
 
-        messages = await get_direct_messages(merchant.id, public_key)
-        await update_customer_no_unread_messages(merchant.id, public_key)
+        messages = await get_direct_messages(nostracct.id, public_key)
+        await update_customer_no_unread_messages(nostracct.id, public_key)
         return messages
     except AssertionError as ex:
         raise HTTPException(
@@ -273,14 +273,14 @@ async def api_create_message(
     data: PartialDirectMessage, wallet: WalletTypeInfo = Depends(require_admin_key)
 ) -> DirectMessage:
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
 
-        dm_event = merchant.build_dm_event(data.message, data.public_key)
+        dm_event = nostracct.build_dm_event(data.message, data.public_key)
         data.event_id = dm_event.id
         data.event_created_at = dm_event.created_at
 
-        dm = await create_direct_message(merchant.id, data)
+        dm = await create_direct_message(nostracct.id, data)
         await nostr_client.publish_nostr_event(dm_event)
 
         return dm
@@ -305,9 +305,9 @@ async def api_get_customers(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
 ) -> List[Customer]:
     try:
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "Merchant cannot be found"
-        return await get_customers(merchant.id)
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "NostrAcct cannot be found"
+        return await get_customers(nostracct.id)
 
     except AssertionError as ex:
         raise HTTPException(
@@ -331,15 +331,15 @@ async def api_create_customer(
     try:
         pubkey = normalize_public_key(data.public_key)
 
-        merchant = await get_merchant_for_user(wallet.wallet.user)
-        assert merchant, "A merchant does not exists for this user"
-        assert merchant.id == data.merchant_id, "Invalid merchant id for user"
+        nostracct = await get_nostracct_for_user(wallet.wallet.user)
+        assert nostracct, "A nostracct does not exists for this user"
+        assert nostracct.id == data.nostracct_id, "Invalid nostracct id for user"
 
-        existing_customer = await get_customer(merchant.id, pubkey)
+        existing_customer = await get_customer(nostracct.id, pubkey)
         assert existing_customer is None, "This public key already exists"
 
         customer = await create_customer(
-            merchant.id, Customer(merchant_id=merchant.id, public_key=pubkey)
+            nostracct.id, Customer(nostracct_id=nostracct.id, public_key=pubkey)
         )
 
         await nostr_client.user_profile_temp_subscribe(pubkey)

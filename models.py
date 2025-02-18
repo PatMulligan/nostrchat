@@ -32,26 +32,26 @@ class Nostrable:
 ######################################## MERCHANT ######################################
 
 
-class MerchantProfile(BaseModel):
+class NostrAcctProfile(BaseModel):
     name: Optional[str] = None
     about: Optional[str] = None
     picture: Optional[str] = None
 
 
-class MerchantConfig(MerchantProfile):
+class NostrAcctConfig(NostrAcctProfile):
     event_id: Optional[str] = None
     sync_from_nostr = False
     active: bool = False
     restore_in_progress: Optional[bool] = False
 
 
-class PartialMerchant(BaseModel):
+class PartialNostrAcct(BaseModel):
     private_key: str
     public_key: str
-    config: MerchantConfig = MerchantConfig()
+    config: NostrAcctConfig = NostrAcctConfig()
 
 
-class Merchant(PartialMerchant, Nostrable):
+class NostrAcct(PartialNostrAcct, Nostrable):
     id: str
     time: Optional[int] = 0
 
@@ -81,10 +81,10 @@ class Merchant(PartialMerchant, Nostrable):
         return event
 
     @classmethod
-    def from_row(cls, row: dict) -> "Merchant":
-        merchant = cls(**row)
-        merchant.config = MerchantConfig(**json.loads(row["meta"]))
-        return merchant
+    def from_row(cls, row: dict) -> "NostrAcct":
+        nostracct = cls(**row)
+        nostracct.config = NostrAcctConfig(**json.loads(row["meta"]))
+        return nostracct
 
     def to_nostr_event(self, pubkey: str) -> NostrEvent:
         content = {
@@ -106,7 +106,7 @@ class Merchant(PartialMerchant, Nostrable):
     def to_nostr_delete_event(self, pubkey: str) -> NostrEvent:
         content = {
             "name": f"{self.config.name} (deleted)",
-            "about": "Merchant Deleted",
+            "about": "NostrAcct Deleted",
             "picture": "",
         }
         delete_event = NostrEvent(
@@ -168,7 +168,7 @@ class CustomerProfile(BaseModel):
 
 
 class Customer(BaseModel):
-    merchant_id: str
+    nostracct_id: str
     public_key: str
     event_created_at: Optional[int] = None
     profile: Optional[CustomerProfile] = None

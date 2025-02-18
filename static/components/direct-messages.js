@@ -1,6 +1,6 @@
 window.app.component('direct-messages', {
   name: 'direct-messages',
-  props: ['active-chat-customer', 'merchant-id', 'adminkey', 'inkey'],
+  props: ['active-chat-customer', 'nostracct-id', 'adminkey', 'inkey'],
   template: '#direct-messages',
   delimiters: ['${', '}'],
   watch: {
@@ -117,7 +117,7 @@ window.app.component('direct-messages', {
           this.adminkey,
           {
             public_key: this.newPublicKey,
-            merchant_id: this.merchantId,
+            nostracct_id: this.nostracctId,
             unread_messages: 0
           }
         )

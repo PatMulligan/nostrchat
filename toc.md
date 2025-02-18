@@ -10,7 +10,7 @@ The Extension is free and open-source software, released under [specify the FOSS
 
 ## 3. No Warranty
 
-The Extension is provided "as is" and with all faults, and the developer expressly disclaims all warranties of any kind, whether express, implied, statutory, or otherwise, including but not limited to warranties of merchantability, fitness for a particular purpose, non-infringement, and any warranties arising out of course of dealing or usage of trade. No advice or information, whether oral or written, obtained from the developer or elsewhere will create any warranty not expressly stated in this Terms.
+The Extension is provided "as is" and with all faults, and the developer expressly disclaims all warranties of any kind, whether express, implied, statutory, or otherwise, including but not limited to warranties of nostracctability, fitness for a particular purpose, non-infringement, and any warranties arising out of course of dealing or usage of trade. No advice or information, whether oral or written, obtained from the developer or elsewhere will create any warranty not expressly stated in this Terms.
 
 ## 4. Limitation of Liability
 

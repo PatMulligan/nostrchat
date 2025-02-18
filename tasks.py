@@ -7,14 +7,14 @@ from loguru import logger
 from .nostr.nostr_client import NostrClient
 from .services import (
     process_nostr_message,
-    subscribe_to_all_merchants,
+    subscribe_to_all_nostraccts,
 )
 
 
 async def wait_for_nostr_events(nostr_client: NostrClient):
     while True:
         try:
-            await subscribe_to_all_merchants()
+            await subscribe_to_all_nostraccts()
 
             while True:
                 message = await nostr_client.get_event()

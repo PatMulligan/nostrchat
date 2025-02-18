@@ -17,13 +17,13 @@ This extension uses the LNbits [nostrclient](https://github.com/lnbits/nostrclie
 - [nostrclient](https://github.com/lnbits/nostrclient) is usually installed as admin-only extension, so if you do not have admin access please ask an admin to confirm that [nostrclient](https://github.com/lnbits/nostrclient) is OK.
 - see the [Troubleshoot](https://github.com/lnbits/nostrclient#troubleshoot) section for more details on how to check the health of `nostrclient` extension
 
-## Create, or import, a merchant account
+## Create, or import, a nostracct account
 
-As a merchant you need to provide a Nostr key pair, or the extension can generate one for you.
+As a nostracct you need to provide a Nostr key pair, or the extension can generate one for you.
 ![create keys](https://i.imgur.com/KhQYKOe.png)
 
-Once you have a merchant "account", you can view the details on the merchant dropdown
-![merchant dropdown](https://i.imgur.com/M5abrK9.png)
+Once you have a nostracct "account", you can view the details on the nostracct dropdown
+![nostracct dropdown](https://i.imgur.com/M5abrK9.png)
 
 ## Create a Stall, or shop
 
@@ -88,20 +88,20 @@ You also have a _Chat Box_ to chat with customer
 
 ## Diagon Alley Clients
 
-LNbits also provides a Nostr Market client app. You can visit the client from the merchant dashboard by clicking on the "Market client" link
+LNbits also provides a Nostr Market client app. You can visit the client from the nostracct dashboard by clicking on the "Market client" link
 ![market client link](https://i.imgur.com/3tsots2.png)
 
 or by visiting `https://<LNbits instance URL>/nostrmarket/market`
 
-Make sure to add your `merchant` public key to the list:
+Make sure to add your `nostracct` public key to the list:
 ![image](https://user-images.githubusercontent.com/2951406/236787686-0e300c0a-eb5d-4490-aa70-568738ac78f4.png)
 
 ### Styling
 
-In order to create a customized Marketplace, we use `naddr` as defined in [NIP-19](https://github.com/nostr-protocol/nips/blob/master/19.md#shareable-identifiers-with-extra-metadata). You must create an event (kind: `30019`) that has all the custom properties, including merchants and relays, of your marketplace. Start by going to the marketplace page:
+In order to create a customized Marketplace, we use `naddr` as defined in [NIP-19](https://github.com/nostr-protocol/nips/blob/master/19.md#shareable-identifiers-with-extra-metadata). You must create an event (kind: `30019`) that has all the custom properties, including nostraccts and relays, of your marketplace. Start by going to the marketplace page:
 ![vanilla market](https://i.imgur.com/nCaMh1N.png)
 
-You'll need to Login, and head over to _Marketplace Info_. Optionally import some merchants and relays, that will be included in the event. Click on _Edit_ and fill out your marketplace custom info:
+You'll need to Login, and head over to _Marketplace Info_. Optionally import some nostraccts and relays, that will be included in the event. Click on _Edit_ and fill out your marketplace custom info:
 ![edit](https://i.imgur.com/wEuHuN9.png)
 
 Fill in the optional fields:
@@ -115,10 +115,10 @@ Fill in the optional fields:
 By clicking _Publish_, a `kind: 30019` event will be sent to the defined relays containing all the information about your custom Marketplace. On the left drawer, a button with _Copy Naddr_ will show up.
 ![copy naddr](https://i.imgur.com/VuNIMVf.png)
 
-You can then share your Marketplace, with the merchants and relays, banner, and style by using that Nostr identifier. The URL for the marketplace will be for example: `https://legend.lnbits.com/nostrmarket/market?naddr=naddr1qqfy6ctjddjhgurvv93k....`, you need to include the URL parameter `naddr=<your naddr>`. When a user visits that URL, the client will get the `30019` event and configure the Marketplace to what you defined. In the example bellow, a couple of merchants, relays, `autumn` theme, name (_Veggies Market_) and a header banner:
+You can then share your Marketplace, with the nostraccts and relays, banner, and style by using that Nostr identifier. The URL for the marketplace will be for example: `https://legend.lnbits.com/nostrmarket/market?naddr=naddr1qqfy6ctjddjhgurvv93k....`, you need to include the URL parameter `naddr=<your naddr>`. When a user visits that URL, the client will get the `30019` event and configure the Marketplace to what you defined. In the example bellow, a couple of nostraccts, relays, `autumn` theme, name (_Veggies Market_) and a header banner:
 ![final](https://i.imgur.com/EYG7vYS.png)
 
-The nostr event is a replaceable event, so you can change it to what you like and publish a new one to replace a previous one. For example adding a new merchant, or remove, change theme, add more relays,e tc...
+The nostr event is a replaceable event, so you can change it to what you like and publish a new one to replace a previous one. For example adding a new nostracct, or remove, change theme, add more relays,e tc...
 
 ## Troubleshoot
 
@@ -132,7 +132,7 @@ https://user-images.githubusercontent.com/2951406/236777983-259f81d8-136f-48b3-b
 
 If the communication with Nostr is not working then an admin user can `Restart` the Nostr connection.
 
-Merchants can afterwards re-publish their products.
+NostrAccts can afterwards re-publish their products.
 
 https://user-images.githubusercontent.com/2951406/236778651-7ada9f6d-07a1-491c-ac9c-55530326c32a.mp4
 

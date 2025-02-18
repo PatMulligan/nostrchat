@@ -5,7 +5,7 @@ window.app = Vue.createApp({
   mixins: [window.windowMixin],
   data: function () {
     return {
-      merchant: {},
+      nostracct: {},
       activeChatCustomer: '',
       showKeys: false,
       importKeyDialog: {
@@ -20,7 +20,7 @@ window.app = Vue.createApp({
   methods: {
     generateKeys: async function () {
       const privateKey = nostr.generatePrivateKey()
-      await this.createMerchant(privateKey)
+      await this.createNostrAcct(privateKey)
     },
     importKeys: async function () {
       this.importKeyDialog.show = false
@@ -38,7 +38,7 @@ window.app = Vue.createApp({
           message: `${error}`
         })
       }
-      await this.createMerchant(privateKey)
+      await this.createNostrAcct(privateKey)
     },
     showImportKeysDialog: async function () {
       this.importKeyDialog.show = true
@@ -46,41 +46,41 @@ window.app = Vue.createApp({
     toggleShowKeys: function () {
       this.showKeys = !this.showKeys
     },
-    toggleMerchantState: async function () {
-      const merchant = await this.getMerchant()
-      if (!merchant) {
+    toggleNostrAcctState: async function () {
+      const nostracct = await this.getNostrAcct()
+      if (!nostracct) {
         this.$q.notify({
           timeout: 5000,
           type: 'warning',
-          message: 'Cannot fetch merchant!'
+          message: 'Cannot fetch nostracct!'
         })
         return
       }
-      const message = merchant.config.active
+      const message = nostracct.config.active
         ? 'New orders will not be processed. Are you sure you want to deactivate?'
-        : merchant.config.restore_in_progress
-          ? 'Merchant restore  from nostr in progress. Please wait!! ' +
+        : nostracct.config.restore_in_progress
+          ? 'NostrAcct restore  from nostr in progress. Please wait!! ' +
           'Activating now can lead to duplicate order processing. Click "OK" if you want to activate anyway?'
-          : 'Are you sure you want activate this merchant?'
+          : 'Are you sure you want activate this nostracct?'
 
       LNbits.utils.confirmDialog(message).onOk(async () => {
-        await this.toggleMerchant()
+        await this.toggleNostrAcct()
       })
     },
     // NOTE: Leaving toggle functionality for now
     // in the case it makes sense to handle nostrMarket and other extension chats altogether
-    toggleMerchant: async function () {
+    toggleNostrAcct: async function () {
       try {
         const { data } = await LNbits.api.request(
           'PUT',
-          `/nostrmarket/api/v1/merchant/${this.merchant.id}/toggle`,
+          `/nostrmarket/api/v1/nostracct/${this.nostracct.id}/toggle`,
           this.g.user.wallets[0].adminkey
         )
         const state = data.config.active ? 'activated' : 'disabled'
-        this.merchant = data
+        this.nostracct = data
         this.$q.notify({
           type: 'positive',
-          message: `'Merchant ${state}`,
+          message: `'NostrAcct ${state}`,
           timeout: 5000
         })
       } catch (error) {
@@ -88,12 +88,12 @@ window.app = Vue.createApp({
         LNbits.utils.notifyApiError(error)
       }
     },
-    handleMerchantDeleted: function () {
-      this.merchant = null
+    handleNostrAcctDeleted: function () {
+      this.nostracct = null
       this.activeChatCustomer = ''
       this.showKeys = false
     },
-    createMerchant: async function (privateKey) {
+    createNostrAcct: async function (privateKey) {
       try {
         const pubkey = nostr.getPublicKey(privateKey)
         const payload = {
@@ -103,28 +103,28 @@ window.app = Vue.createApp({
         }
         const { data } = await LNbits.api.request(
           'POST',
-          '/nostrmarket/api/v1/merchant',
+          '/nostrmarket/api/v1/nostracct',
           this.g.user.wallets[0].adminkey,
           payload
         )
-        this.merchant = data
+        this.nostracct = data
         this.$q.notify({
           type: 'positive',
-          message: 'Merchant Created!'
+          message: 'NostrAcct Created!'
         })
         this.waitForNotifications()
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
     },
-    getMerchant: async function () {
+    getNostrAcct: async function () {
       try {
         const { data } = await LNbits.api.request(
           'GET',
-          '/nostrmarket/api/v1/merchant',
+          '/nostrmarket/api/v1/nostracct',
           this.g.user.wallets[0].inkey
         )
-        this.merchant = data
+        this.nostracct = data
         return data
       } catch (error) {
         LNbits.utils.notifyApiError(error)
@@ -139,11 +139,11 @@ window.app = Vue.createApp({
     //   this.orderPubkey = customerPubkey
     // },
     waitForNotifications: async function () {
-      if (!this.merchant) return
+      if (!this.nostracct) return
       try {
         const scheme = location.protocol === 'http:' ? 'ws' : 'wss'
         const port = location.port ? `:${location.port}` : ''
-        const wsUrl = `${scheme}://${document.domain}${port}/api/v1/ws/${this.merchant.id}`
+        const wsUrl = `${scheme}://${document.domain}${port}/api/v1/ws/${this.nostracct.id}`
         console.log('Reconnecting to websocket: ', wsUrl)
         this.wsConnection = new WebSocket(wsUrl)
         this.wsConnection.onmessage = async e => {
@@ -180,7 +180,7 @@ window.app = Vue.createApp({
     }
   },
   created: async function () {
-    await this.getMerchant()
+    await this.getNostrAcct()
     setInterval(async () => {
       if (
         !this.wsConnection ||

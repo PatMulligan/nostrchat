@@ -6,7 +6,7 @@ Nostr was partly based on the the previous version of this extension "Diagon All
 
 The Nostr Market extension includes:
 
-- A merchant client to manage products, sales and communication with customers.
-- A customer client to find and order products from merchants, communicate with merchants and track status of ordered products.
+- A nostracct client to manage products, sales and communication with customers.
+- A customer client to find and order products from nostraccts, communicate with nostraccts and track status of ordered products.
 
 All communication happens over NIP04 encrypted DMs.

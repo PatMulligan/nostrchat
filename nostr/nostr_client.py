@@ -71,7 +71,7 @@ class NostrClient:
     async def publish_nostr_event(self, e: NostrEvent):
         await self.send_req_queue.put(["EVENT", e.dict()])
 
-    async def subscribe_merchants(
+    async def subscribe_nostraccts(
         self,
         public_keys: List[str],
         dm_time=0,
@@ -80,30 +80,30 @@ class NostrClient:
         dm_filters = self._filters_for_direct_messages(public_keys, dm_time)
         profile_filters = self._filters_for_user_profile(public_keys, profile_time)
 
-        merchant_filters = (
+        nostracct_filters = (
             dm_filters + profile_filters
         )
 
         self.subscription_id = "nostrmarket-" + urlsafe_short_hash()[:32]
-        await self.send_req_queue.put(["REQ", self.subscription_id] + merchant_filters)
+        await self.send_req_queue.put(["REQ", self.subscription_id] + nostracct_filters)
 
         logger.debug(
             f"Subscribing to events for: {len(public_keys)} keys. New subscription id: {self.subscription_id}"
         )
 
-    async def merchant_temp_subscription(self, pk, duration=10):
+    async def nostracct_temp_subscription(self, pk, duration=10):
         dm_filters = self._filters_for_direct_messages([pk], 0)
         profile_filters = self._filters_for_user_profile([pk], 0)
 
-        merchant_filters = (
+        nostracct_filters = (
             dm_filters + profile_filters
         )
 
-        subscription_id = "merchant-" + urlsafe_short_hash()[:32]
+        subscription_id = "nostracct-" + urlsafe_short_hash()[:32]
         logger.debug(
-            f"New merchant temp subscription ({duration} sec). Subscription id: {subscription_id}"
+            f"New nostracct temp subscription ({duration} sec). Subscription id: {subscription_id}"
         )
-        await self.send_req_queue.put(["REQ", subscription_id] + merchant_filters)
+        await self.send_req_queue.put(["REQ", subscription_id] + nostracct_filters)
 
         async def unsubscribe_with_delay(sub_id, d):
             await asyncio.sleep(d)
@@ -171,7 +171,7 @@ class NostrClient:
         return on_open, on_message, on_error, on_close
 
     async def restart(self):
-        await self.unsubscribe_merchants()
+        await self.unsubscribe_nostraccts()
         # Give some time for the CLOSE events to propagate before restarting
         await asyncio.sleep(10)
 
@@ -181,17 +181,17 @@ class NostrClient:
         self._safe_ws_stop()
 
     async def stop(self):
-        await self.unsubscribe_merchants()
+        await self.unsubscribe_nostraccts()
         self.running = False
 
         # Give some time for the CLOSE events to propagate before closing the connection
         await asyncio.sleep(10)
         self._safe_ws_stop()
 
-    async def unsubscribe_merchants(self):
+    async def unsubscribe_nostraccts(self):
         await self.send_req_queue.put(["CLOSE", self.subscription_id])
         logger.debug(
-            f"Unsubscribed from all merchants events. Subscription id: {self.subscription_id}"
+            f"Unsubscribed from all nostraccts events. Subscription id: {self.subscription_id}"
         )
 
     async def unsubscribe(self, subscription_id):
