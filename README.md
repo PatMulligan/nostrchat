@@ -1,4 +1,4 @@
-# Nostr Market ([NIP-15](https://github.com/nostr-protocol/nips/blob/master/15.md)) - <small>[LNbits](https://github.com/lnbits/lnbits) extension</small>
+# Nostr Chat ([NIP-15](https://github.com/nostr-protocol/nips/blob/master/15.md)) - <small>[LNbits](https://github.com/lnbits/lnbits) extension</small>
 
 <small>For more about LNBits extension check [this tutorial](https://github.com/lnbits/lnbits/wiki/LNbits-Extensions).</small>
 
@@ -88,7 +88,7 @@ You also have a _Chat Box_ to chat with peer
 
 ## Diagon Alley Clients
 
-LNbits also provides a Nostr Market client app. You can visit the client from the nostracct dashboard by clicking on the "Market client" link
+LNbits also provides a Nostr Chat client app. You can visit the client from the nostracct dashboard by clicking on the "Market client" link
 ![market client link](https://i.imgur.com/3tsots2.png)
 
 or by visiting `https://<LNbits instance URL>/nostrchat/market`

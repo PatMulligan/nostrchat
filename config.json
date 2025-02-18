@@ -1,5 +1,5 @@
 {
-  "name": "Nostr Market",
+  "name": "Nostr Chat",
   "short_description": "Nostr Webshop/market on LNbits",
   "tile": "/nostrchat/static/images/bitcoin-shop.png",
   "min_lnbits_version": "1.0.0",
