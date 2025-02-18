@@ -67,7 +67,7 @@ window.app.component('direct-messages', {
       try {
         const {data} = await LNbits.api.request(
           'GET',
-          '/nostrmarket/api/v1/message/' + pubkey,
+          '/nostrchat/api/v1/message/' + pubkey,
           this.inkey
         )
         this.messages = data
@@ -81,7 +81,7 @@ window.app.component('direct-messages', {
       try {
         const {data} = await LNbits.api.request(
           'GET',
-          '/nostrmarket/api/v1/customer',
+          '/nostrchat/api/v1/customer',
           this.inkey
         )
         this.customers = data
@@ -95,7 +95,7 @@ window.app.component('direct-messages', {
       try {
         const {data} = await LNbits.api.request(
           'POST',
-          '/nostrmarket/api/v1/message',
+          '/nostrchat/api/v1/message',
           this.adminkey,
           {
             message: this.newMessage,
@@ -113,7 +113,7 @@ window.app.component('direct-messages', {
       try {
         const {data} = await LNbits.api.request(
           'POST',
-          '/nostrmarket/api/v1/customer',
+          '/nostrchat/api/v1/customer',
           this.adminkey,
           {
             public_key: this.newPublicKey,

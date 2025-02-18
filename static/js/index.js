@@ -73,7 +73,7 @@ window.app = Vue.createApp({
       try {
         const { data } = await LNbits.api.request(
           'PUT',
-          `/nostrmarket/api/v1/nostracct/${this.nostracct.id}/toggle`,
+          `/nostrchat/api/v1/nostracct/${this.nostracct.id}/toggle`,
           this.g.user.wallets[0].adminkey
         )
         const state = data.config.active ? 'activated' : 'disabled'
@@ -103,7 +103,7 @@ window.app = Vue.createApp({
         }
         const { data } = await LNbits.api.request(
           'POST',
-          '/nostrmarket/api/v1/nostracct',
+          '/nostrchat/api/v1/nostracct',
           this.g.user.wallets[0].adminkey,
           payload
         )
@@ -121,7 +121,7 @@ window.app = Vue.createApp({
       try {
         const { data } = await LNbits.api.request(
           'GET',
-          '/nostrmarket/api/v1/nostracct',
+          '/nostrchat/api/v1/nostracct',
           this.g.user.wallets[0].inkey
         )
         this.nostracct = data
@@ -170,7 +170,7 @@ window.app = Vue.createApp({
           try {
             await LNbits.api.request(
               'PUT',
-              '/nostrmarket/api/v1/restart',
+              '/nostrchat/api/v1/restart',
               this.g.user.wallets[0].adminkey
             )
           } catch (error) {

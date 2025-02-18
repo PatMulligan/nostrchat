@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lnbits-nostrmarket"
+name = "lnbits-nostrchat"
 version = "0.0.0"
 description = "LNbits, free and open-source Lightning wallet and accounts system."
 authors = ["Alan Bits <alan@lnbits.com>"]

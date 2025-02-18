@@ -91,7 +91,7 @@ You also have a _Chat Box_ to chat with customer
 LNbits also provides a Nostr Market client app. You can visit the client from the nostracct dashboard by clicking on the "Market client" link
 ![market client link](https://i.imgur.com/3tsots2.png)
 
-or by visiting `https://<LNbits instance URL>/nostrmarket/market`
+or by visiting `https://<LNbits instance URL>/nostrchat/market`
 
 Make sure to add your `nostracct` public key to the list:
 ![image](https://user-images.githubusercontent.com/2951406/236787686-0e300c0a-eb5d-4490-aa70-568738ac78f4.png)
@@ -115,7 +115,7 @@ Fill in the optional fields:
 By clicking _Publish_, a `kind: 30019` event will be sent to the defined relays containing all the information about your custom Marketplace. On the left drawer, a button with _Copy Naddr_ will show up.
 ![copy naddr](https://i.imgur.com/VuNIMVf.png)
 
-You can then share your Marketplace, with the nostraccts and relays, banner, and style by using that Nostr identifier. The URL for the marketplace will be for example: `https://legend.lnbits.com/nostrmarket/market?naddr=naddr1qqfy6ctjddjhgurvv93k....`, you need to include the URL parameter `naddr=<your naddr>`. When a user visits that URL, the client will get the `30019` event and configure the Marketplace to what you defined. In the example bellow, a couple of nostraccts, relays, `autumn` theme, name (_Veggies Market_) and a header banner:
+You can then share your Marketplace, with the nostraccts and relays, banner, and style by using that Nostr identifier. The URL for the marketplace will be for example: `https://legend.lnbits.com/nostrchat/market?naddr=naddr1qqfy6ctjddjhgurvv93k....`, you need to include the URL parameter `naddr=<your naddr>`. When a user visits that URL, the client will get the `30019` event and configure the Marketplace to what you defined. In the example bellow, a couple of nostraccts, relays, `autumn` theme, name (_Veggies Market_) and a header banner:
 ![final](https://i.imgur.com/EYG7vYS.png)
 
 The nostr event is a replaceable event, so you can change it to what you like and publish a new one to replace a previous one. For example adding a new nostracct, or remove, change theme, add more relays,e tc...

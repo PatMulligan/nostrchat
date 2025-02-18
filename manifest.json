@@ -1,9 +1,9 @@
 {
   "repos": [
     {
-      "id": "nostrmarket",
+      "id": "nostrchat",
       "organisation": "lnbits",
-      "repository": "nostrmarket"
+      "repository": "nostrchat"
     }
   ]
 }

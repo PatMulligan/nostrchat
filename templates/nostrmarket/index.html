@@ -148,7 +148,7 @@
 
         <q-card-section class="q-pa-none">
           <q-separator></q-separator>
-          <q-list> {% include "nostrmarket/_api_docs.html" %} </q-list>
+          <q-list> {% include "nostrchat/_api_docs.html" %} </q-list>
         </q-card-section>
       </q-card>
     </div>
@@ -200,22 +200,22 @@
 </style>
 
 <template id="key-pair"
-  >{% include("nostrmarket/components/key-pair.html") %}</template
+  >{% include("nostrchat/components/key-pair.html") %}</template
 >
 <template id="direct-messages"
-  >{% include("nostrmarket/components/direct-messages.html") %}</template
+  >{% include("nostrchat/components/direct-messages.html") %}</template
 >
 
 <template id="nostracct-details"
-  >{% include("nostrmarket/components/nostracct-details.html") %}</template
+  >{% include("nostrchat/components/nostracct-details.html") %}</template
 >
 
-<script src="{{ url_for('nostrmarket_static', path='js/nostr.bundle.js') }}"></script>
-<script src="{{ url_for('nostrmarket_static', path='js/utils.js') }}"></script>
-<script src="{{ url_for('nostrmarket_static', path='js/index.js') }}"></script>
+<script src="{{ url_for('nostrchat_static', path='js/nostr.bundle.js') }}"></script>
+<script src="{{ url_for('nostrchat_static', path='js/utils.js') }}"></script>
+<script src="{{ url_for('nostrchat_static', path='js/index.js') }}"></script>
 
-<script src="{{ static_url_for('nostrmarket/static', 'components/key-pair.js') }}"></script>
-<script src="{{ static_url_for('nostrmarket/static', 'components/direct-messages.js') }}"></script>
-<script src="{{ static_url_for('nostrmarket/static', 'components/nostracct-details.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/key-pair.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/direct-messages.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/nostracct-details.js') }}"></script>
 
 {% endblock %}

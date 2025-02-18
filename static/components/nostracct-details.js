@@ -15,7 +15,7 @@ window.app.component('nostracct-details', {
       try {
         await LNbits.api.request(
           'PUT',
-          `/nostrmarket/api/v1/nostracct/${this.nostracctId}/nostr`,
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}/nostr`,
           this.adminkey
         )
         this.$q.notify({
@@ -32,7 +32,7 @@ window.app.component('nostracct-details', {
       try {
         await LNbits.api.request(
           'GET',
-          `/nostrmarket/api/v1/nostracct/${this.nostracctId}/nostr`,
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}/nostr`,
           this.adminkey
         )
         this.$q.notify({
@@ -57,7 +57,7 @@ window.app.component('nostracct-details', {
           try {
             await LNbits.api.request(
               'DELETE',
-              '/nostrmarket/api/v1/nostracct/' + this.nostracctId,
+              '/nostrchat/api/v1/nostracct/' + this.nostracctId,
               this.adminkey
             )
             this.$emit('nostracct-deleted', this.nostracctId)
@@ -83,7 +83,7 @@ window.app.component('nostracct-details', {
           try {
             await LNbits.api.request(
               'DELETE',
-              `/nostrmarket/api/v1/nostracct/${this.nostracctId}/nostr`,
+              `/nostrchat/api/v1/nostracct/${this.nostracctId}/nostr`,
               this.adminkey
             )
             this.$q.notify({
