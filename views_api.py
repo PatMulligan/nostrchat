@@ -361,9 +361,10 @@ async def api_create_customer(
 ######################################## OTHER ########################################
 
 
-@nostrchat_ext.get("/api/v1/currencies")
-async def api_list_currencies_available():
-    return list(currencies.keys())
+# NOTE: keep for later integrations
+# @nostrchat_ext.get("/api/v1/currencies")
+# async def api_list_currencies_available():
+#     return list(currencies.keys())
 
 
 @nostrchat_ext.put("/api/v1/restart")
