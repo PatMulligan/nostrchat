@@ -5,8 +5,8 @@ from lnbits.helpers import urlsafe_short_hash
 
 from . import db
 from .models import (
-    Customer,
-    CustomerProfile,
+    Peer,
+    PeerProfile,
     DirectMessage,
     NostrAcct,
     NostrAcctConfig,
@@ -234,10 +234,10 @@ async def delete_nostracct_direct_messages(nostracct_id: str) -> None:
 ######################################## CUSTOMERS #####################################
 
 
-async def create_customer(nostracct_id: str, data: Customer) -> Customer:
+async def create_peer(nostracct_id: str, data: Peer) -> Peer:
     await db.execute(
         """
-        INSERT INTO nostrchat.customers (nostracct_id, public_key, meta)
+        INSERT INTO nostrchat.peers (nostracct_id, public_key, meta)
         VALUES (:nostracct_id, :public_key, :meta)
         """,
         {
@@ -247,15 +247,15 @@ async def create_customer(nostracct_id: str, data: Customer) -> Customer:
         },
     )
 
-    customer = await get_customer(nostracct_id, data.public_key)
-    assert customer, "Newly created customer couldn't be retrieved"
-    return customer
+    peer = await get_peer(nostracct_id, data.public_key)
+    assert peer, "Newly created peer couldn't be retrieved"
+    return peer
 
 
-async def get_customer(nostracct_id: str, public_key: str) -> Optional[Customer]:
+async def get_peer(nostracct_id: str, public_key: str) -> Optional[Peer]:
     row: dict = await db.fetchone(
         """
-            SELECT * FROM nostrchat.customers
+            SELECT * FROM nostrchat.peers
             WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         """,
         {
@@ -263,33 +263,33 @@ async def get_customer(nostracct_id: str, public_key: str) -> Optional[Customer]
             "public_key": public_key,
         },
     )
-    return Customer.from_row(row) if row else None
+    return Peer.from_row(row) if row else None
 
 
-async def get_customers(nostracct_id: str) -> List[Customer]:
+async def get_peers(nostracct_id: str) -> List[Peer]:
     rows: list[dict] = await db.fetchall(
-        "SELECT * FROM nostrchat.customers WHERE nostracct_id = :nostracct_id",
+        "SELECT * FROM nostrchat.peers WHERE nostracct_id = :nostracct_id",
         {"nostracct_id": nostracct_id},
     )
-    return [Customer.from_row(row) for row in rows]
+    return [Peer.from_row(row) for row in rows]
 
 
-async def get_all_unique_customers() -> List[Customer]:
+async def get_all_unique_peers() -> List[Peer]:
     q = """
             SELECT public_key, MAX(nostracct_id) as nostracct_id, MAX(event_created_at)
-            FROM nostrchat.customers
+            FROM nostrchat.peers
             GROUP BY public_key
         """
     rows: list[dict] = await db.fetchall(q)
-    return [Customer.from_row(row) for row in rows]
+    return [Peer.from_row(row) for row in rows]
 
 
-async def update_customer_profile(
-    public_key: str, event_created_at: int, profile: CustomerProfile
+async def update_peer_profile(
+    public_key: str, event_created_at: int, profile: PeerProfile
 ):
     await db.execute(
         """
-        UPDATE nostrchat.customers
+        UPDATE nostrchat.peers
         SET event_created_at = :event_created_at, meta = :meta
         WHERE public_key = :public_key
         """,
@@ -301,10 +301,10 @@ async def update_customer_profile(
     )
 
 
-async def increment_customer_unread_messages(nostracct_id: str, public_key: str):
+async def increment_peer_unread_messages(nostracct_id: str, public_key: str):
     await db.execute(
         """
-        UPDATE nostrchat.customers
+        UPDATE nostrchat.peers
         SET unread_messages = unread_messages + 1
         WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         """,
@@ -316,10 +316,10 @@ async def increment_customer_unread_messages(nostracct_id: str, public_key: str)
 
 
 # ??? two nostraccts
-async def update_customer_no_unread_messages(nostracct_id: str, public_key: str):
+async def update_peer_no_unread_messages(nostracct_id: str, public_key: str):
     await db.execute(
         """
-        UPDATE nostrchat.customers
+        UPDATE nostrchat.peers
         SET unread_messages = 0
         WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         """,

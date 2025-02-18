@@ -16,24 +16,24 @@ from loguru import logger
 
 from . import nostr_client, nostrchat_ext
 from .crud import (
-    create_customer,
+    create_peer,
     create_direct_message,
     create_nostracct,
     delete_nostracct,
     delete_nostracct_direct_messages,
-    get_customer,
-    get_customers,
+    get_peer,
+    get_peers,
     get_direct_messages,
     get_last_direct_messages_time,
     get_nostracct_by_pubkey,
     get_nostracct_for_user,
     touch_nostracct,
-    update_customer_no_unread_messages,
+    update_peer_no_unread_messages,
     update_nostracct,
 )
 from .helpers import normalize_public_key
 from .models import (
-    Customer,
+    Peer,
     DirectMessage,
     NostrAcct,
     PartialDirectMessage,
@@ -253,7 +253,7 @@ async def api_get_messages(
         assert nostracct, "NostrAcct cannot be found"
 
         messages = await get_direct_messages(nostracct.id, public_key)
-        await update_customer_no_unread_messages(nostracct.id, public_key)
+        await update_peer_no_unread_messages(nostracct.id, public_key)
         return messages
     except AssertionError as ex:
         raise HTTPException(
@@ -300,14 +300,14 @@ async def api_create_message(
 ######################################## CUSTOMERS #####################################
 
 
-@nostrchat_ext.get("/api/v1/customer")
-async def api_get_customers(
+@nostrchat_ext.get("/api/v1/peer")
+async def api_get_peers(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
-) -> List[Customer]:
+) -> List[Peer]:
     try:
         nostracct = await get_nostracct_for_user(wallet.wallet.user)
         assert nostracct, "NostrAcct cannot be found"
-        return await get_customers(nostracct.id)
+        return await get_peers(nostracct.id)
 
     except AssertionError as ex:
         raise HTTPException(
@@ -322,11 +322,11 @@ async def api_get_customers(
         ) from ex
 
 
-@nostrchat_ext.post("/api/v1/customer")
-async def api_create_customer(
-    data: Customer,
+@nostrchat_ext.post("/api/v1/peer")
+async def api_create_peer(
+    data: Peer,
     wallet: WalletTypeInfo = Depends(require_admin_key),
-) -> Customer:
+) -> Peer:
 
     try:
         pubkey = normalize_public_key(data.public_key)
@@ -335,16 +335,16 @@ async def api_create_customer(
         assert nostracct, "A nostracct does not exists for this user"
         assert nostracct.id == data.nostracct_id, "Invalid nostracct id for user"
 
-        existing_customer = await get_customer(nostracct.id, pubkey)
-        assert existing_customer is None, "This public key already exists"
+        existing_peer = await get_peer(nostracct.id, pubkey)
+        assert existing_peer is None, "This public key already exists"
 
-        customer = await create_customer(
-            nostracct.id, Customer(nostracct_id=nostracct.id, public_key=pubkey)
+        peer = await create_peer(
+            nostracct.id, Peer(nostracct_id=nostracct.id, public_key=pubkey)
         )
 
         await nostr_client.user_profile_temp_subscribe(pubkey)
 
-        return customer
+        return peer
     except (ValueError, AssertionError) as ex:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
@@ -354,7 +354,7 @@ async def api_create_customer(
         logger.warning(ex)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot create customer",
+            detail="Cannot create peer",
         ) from ex
 
 

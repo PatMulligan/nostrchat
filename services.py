@@ -9,18 +9,18 @@ from loguru import logger
 
 from . import nostr_client
 from .crud import (
-    CustomerProfile,
-    create_customer,
+    PeerProfile,
+    create_peer,
     create_direct_message,
-    get_customer,
+    get_peer,
     get_last_direct_messages_created_at,
     get_nostracct_by_pubkey,
     get_nostraccts_ids_with_pubkeys,
-    increment_customer_unread_messages,
-    update_customer_profile,
+    increment_peer_unread_messages,
+    update_peer_profile,
 )
 from .models import (
-    Customer,
+    Peer,
     DirectMessage,
     DirectMessageType,
     NostrAcct,
@@ -79,7 +79,7 @@ async def send_dm(
         json.dumps(
             {
                 "type": f"dm:{dm.type}",
-                "customerPubkey": other_pubkey,
+                "peerPubkey": other_pubkey,
                 "dm": dm_reply.dict(),
             }
         ),
@@ -94,7 +94,7 @@ async def process_nostr_message(msg: str):
             _, event = rest
             event = NostrEvent(**event)
             if event.kind == 0:
-                await _handle_customer_profile_update(event)
+                await _handle_peer_profile_update(event)
             elif event.kind == 4:
                 await _handle_nip04_message(event)
             return
@@ -130,11 +130,11 @@ async def _handle_nip04_message(event: NostrEvent):
 async def _handle_incoming_dms(
     event: NostrEvent, nostracct: NostrAcct, clear_text_msg: str
 ):
-    customer = await get_customer(nostracct.id, event.pubkey)
-    if not customer:
-        await _handle_new_customer(event, nostracct)
+    peer = await get_peer(nostracct.id, event.pubkey)
+    if not peer:
+        await _handle_new_peer(event, nostracct)
     else:
-        await increment_customer_unread_messages(nostracct.id, event.pubkey)
+        await increment_peer_unread_messages(nostracct.id, event.pubkey)
 
     dm_type, json_data = PartialDirectMessage.parse_message(clear_text_msg)
     new_dm = await _persist_dm(
@@ -214,7 +214,7 @@ async def _persist_dm(
         json.dumps(
             {
                 "type": f"dm:{dm_type}",
-                "customerPubkey": from_pubkey,
+                "peerPubkey": from_pubkey,
                 "dm": new_dm.dict(),
             }
         ),
@@ -223,14 +223,14 @@ async def _persist_dm(
 
 
 async def reply_to_structured_dm(
-    nostracct: NostrAcct, customer_pubkey: str, dm_type: int, dm_reply: str
+    nostracct: NostrAcct, peer_pubkey: str, dm_type: int, dm_reply: str
 ):
-    dm_event = nostracct.build_dm_event(dm_reply, customer_pubkey)
+    dm_event = nostracct.build_dm_event(dm_reply, peer_pubkey)
     dm = PartialDirectMessage(
         event_id=dm_event.id,
         event_created_at=dm_event.created_at,
         message=dm_reply,
-        public_key=customer_pubkey,
+        public_key=peer_pubkey,
         type=dm_type,
     )
     await create_direct_message(nostracct.id, dm)
@@ -239,7 +239,7 @@ async def reply_to_structured_dm(
     await websocket_updater(
         nostracct.id,
         json.dumps(
-            {"type": f"dm:{dm_type}", "customerPubkey": dm.public_key, "dm": dm.dict()}
+            {"type": f"dm:{dm_type}", "peerPubkey": dm.public_key, "dm": dm.dict()}
         ),
     )
 
@@ -261,20 +261,20 @@ async def subscribe_to_all_nostraccts():
     )
 
 
-async def _handle_new_customer(event: NostrEvent, nostracct: NostrAcct):
-    await create_customer(
-        nostracct.id, Customer(nostracct_id=nostracct.id, public_key=event.pubkey)
+async def _handle_new_peer(event: NostrEvent, nostracct: NostrAcct):
+    await create_peer(
+        nostracct.id, Peer(nostracct_id=nostracct.id, public_key=event.pubkey)
     )
     await nostr_client.user_profile_temp_subscribe(event.pubkey)
 
 
-async def _handle_customer_profile_update(event: NostrEvent):
+async def _handle_peer_profile_update(event: NostrEvent):
     try:
         profile = json.loads(event.content)
-        await update_customer_profile(
+        await update_peer_profile(
             event.pubkey,
             event.created_at,
-            CustomerProfile(
+            PeerProfile(
                 name=profile["name"] if "name" in profile else "",
                 about=profile["about"] if "about" in profile else "",
             ),

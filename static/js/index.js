@@ -6,7 +6,7 @@ window.app = Vue.createApp({
   data: function () {
     return {
       nostracct: {},
-      activeChatCustomer: '',
+      activeChatPeer: '',
       showKeys: false,
       importKeyDialog: {
         show: false,
@@ -90,7 +90,7 @@ window.app = Vue.createApp({
     },
     handleNostrAcctDeleted: function () {
       this.nostracct = null
-      this.activeChatCustomer = ''
+      this.activeChatPeer = ''
       this.showKeys = false
     },
     createNostrAcct: async function (privateKey) {
@@ -131,12 +131,12 @@ window.app = Vue.createApp({
       }
     },
     // TODO: remove this
-    customerSelectedForOrder: function (customerPubkey) {
-      this.activeChatCustomer = customerPubkey
+    peerSelectedForOrder: function (peerPubkey) {
+      this.activeChatPeer = peerPubkey
     },
     // TODO: remove this
-    // filterOrdersForCustomer: function (customerPubkey) {
-    //   this.orderPubkey = customerPubkey
+    // filterOrdersForPeer: function (peerPubkey) {
+    //   this.orderPubkey = peerPubkey
     // },
     waitForNotifications: async function () {
       if (!this.nostracct) return

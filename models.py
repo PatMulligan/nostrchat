@@ -162,22 +162,22 @@ class DirectMessage(PartialDirectMessage):
 ######################################## CUSTOMERS #####################################
 
 
-class CustomerProfile(BaseModel):
+class PeerProfile(BaseModel):
     name: Optional[str] = None
     about: Optional[str] = None
 
 
-class Customer(BaseModel):
+class Peer(BaseModel):
     nostracct_id: str
     public_key: str
     event_created_at: Optional[int] = None
-    profile: Optional[CustomerProfile] = None
+    profile: Optional[PeerProfile] = None
     unread_messages: int = 0
 
     @classmethod
-    def from_row(cls, row: dict) -> "Customer":
-        customer = cls(**row)
-        customer.profile = (
-            CustomerProfile(**json.loads(row["meta"])) if "meta" in row else None
+    def from_row(cls, row: dict) -> "Peer":
+        peer = cls(**row)
+        peer.profile = (
+            PeerProfile(**json.loads(row["meta"])) if "meta" in row else None
         )
-        return customer
+        return peer

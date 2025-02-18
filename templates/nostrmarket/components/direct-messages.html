@@ -20,10 +20,10 @@
         <div class="col-10">
           <q-select
             v-model="activePublicKey"
-            :options="customers.map(c => ({label: buildCustomerLabel(c), value: c.public_key}))"
-            label="Select Customer"
+            :options="peers.map(c => ({label: buildPeerLabel(c), value: c.public_key}))"
+            label="Select Peer"
             emit-value
-            @input="selectActiveCustomer()"
+            @input="selectActivePeer()"
           >
           </q-select>
         </div>
@@ -46,7 +46,7 @@
             <q-chat-message
               v-for="(dm, index) in messagesAsJson"
               :key="index"
-              :name="dm.incoming ? 'customer': 'me'"
+              :name="dm.incoming ? 'peer': 'me'"
               :sent="!dm.incoming"
               :stamp="dm.dateFrom"
               :bg-color="dm.incoming ? 'white' : 'light-green-2'"

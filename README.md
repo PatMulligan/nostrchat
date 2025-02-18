@@ -57,7 +57,7 @@ Fill the necessary fields on the dialog
 - Give it a description
 - Add some categories (this can be used by clients to search for products)
 - Supply an URL for your product image (you can upload an image but it's recommended that the images are hosted outside of LNbits)
-- A price for the product, in the currency selected for the shop (this will be converted to sats when a customer buys)
+- A price for the product, in the currency selected for the shop (this will be converted to sats when a peer buys)
 - The quantity you have in stock, for the product. This will update when orders are made/paid
 
 On the _Stall_ section you can also see (update or delete) the stall details in _Stall Info_ tab
@@ -76,13 +76,13 @@ When you get an order, you can see the details by clicking on the "Plus" sign fo
 
 - Ordered products
 - The order ID
-- Customer's shipping address
-- Customer's public key
+- Peer's shipping address
+- Peer's public key
 - Invoice ID
 
 If applicable, you can set as shipped when shipping is processed.
 
-You also have a _Chat Box_ to chat with customer
+You also have a _Chat Box_ to chat with peer
 
 ![chat box](https://i.imgur.com/fhPP9IB.png)
 
@@ -146,4 +146,4 @@ Stall and product are _Parameterized Replaceable Events_ according to [NIP-33](h
 
 Order placing, invoicing, payment details and order statuses are handled over Nostr using [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md).
 
-Customer support is handled over whatever communication method was specified. If communicationg via nostr, [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md) is used.
+Peer support is handled over whatever communication method was specified. If communicationg via nostr, [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md) is used.

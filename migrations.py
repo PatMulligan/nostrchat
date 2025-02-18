@@ -50,11 +50,11 @@ async def m001_initial(db):
         )
 
     """
-    Initial customers table.
+    Initial peers table.
     """
     await db.execute(
         """
-        CREATE TABLE nostrchat.customers (
+        CREATE TABLE nostrchat.peers (
             nostracct_id TEXT NOT NULL,
             public_key TEXT NOT NULL,
             event_created_at INTEGER,

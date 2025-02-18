@@ -1,10 +1,10 @@
 window.app.component('direct-messages', {
   name: 'direct-messages',
-  props: ['active-chat-customer', 'nostracct-id', 'adminkey', 'inkey'],
+  props: ['active-chat-peer', 'nostracct-id', 'adminkey', 'inkey'],
   template: '#direct-messages',
   delimiters: ['${', '}'],
   watch: {
-    activeChatCustomer: async function (n) {
+    activeChatPeer: async function (n) {
       this.activePublicKey = n
     },
     activePublicKey: async function (n) {
@@ -36,7 +36,7 @@ window.app.component('direct-messages', {
   },
   data: function () {
     return {
-      customers: [],
+      peers: [],
       unreadMessages: 0,
       activePublicKey: null,
       messages: [],
@@ -49,7 +49,7 @@ window.app.component('direct-messages', {
   },
   methods: {
     sendMessage: async function () {},
-    buildCustomerLabel: function (c) {
+    buildPeerLabel: function (c) {
       let label = `${c.profile.name || 'unknown'} ${c.profile.about || ''}`
       if (c.unread_messages) {
         label += `[new: ${c.unread_messages}]`
@@ -77,14 +77,14 @@ window.app.component('direct-messages', {
         LNbits.utils.notifyApiError(error)
       }
     },
-    getCustomers: async function () {
+    getPeers: async function () {
       try {
         const {data} = await LNbits.api.request(
           'GET',
-          '/nostrchat/api/v1/customer',
+          '/nostrchat/api/v1/peer',
           this.inkey
         )
-        this.customers = data
+        this.peers = data
         this.unreadMessages = data.filter(c => c.unread_messages).length
       } catch (error) {
         LNbits.utils.notifyApiError(error)
@@ -113,7 +113,7 @@ window.app.component('direct-messages', {
       try {
         const {data} = await LNbits.api.request(
           'POST',
-          '/nostrchat/api/v1/customer',
+          '/nostrchat/api/v1/peer',
           this.adminkey,
           {
             public_key: this.newPublicKey,
@@ -123,7 +123,7 @@ window.app.component('direct-messages', {
         )
         this.newPublicKey = null
         this.activePublicKey = data.public_key
-        await this.selectActiveCustomer()
+        await this.selectActivePeer()
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       } finally {
@@ -131,22 +131,22 @@ window.app.component('direct-messages', {
       }
     },
     handleNewMessage: async function (data) {
-      if (data.customerPubkey === this.activePublicKey) {
+      if (data.peerPubkey === this.activePublicKey) {
         this.messages.push(data.dm)
         this.focusOnChatBox(this.messages.length - 1)
         // focus back on input box
       }
-      this.getCustomersDebounced()
+      this.getPeersDebounced()
     },
     showOrderDetails: function (orderId, eventId) {
       this.$emit('order-selected', {orderId, eventId})
     },
     showClientOrders: function () {
-      this.$emit('customer-selected', this.activePublicKey)
+      this.$emit('peer-selected', this.activePublicKey)
     },
-    selectActiveCustomer: async function () {
+    selectActivePeer: async function () {
       await this.getDirectMessages(this.activePublicKey)
-      await this.getCustomers()
+      await this.getPeers()
     },
     showMessageRawData: function (index) {
       this.rawMessage = this.messages[index]?.message
@@ -164,7 +164,7 @@ window.app.component('direct-messages', {
     }
   },
   created: async function () {
-    await this.getCustomers()
-    this.getCustomersDebounced = _.debounce(this.getCustomers, 2000, false)
+    await this.getPeers()
+    this.getPeersDebounced = _.debounce(this.getPeers, 2000, false)
   }
 })

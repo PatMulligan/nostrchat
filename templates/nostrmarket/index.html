@@ -8,7 +8,7 @@
         ref="directMessagesRef"
         :inkey="g.user.wallets[0].inkey"
         :adminkey="g.user.wallets[0].adminkey"
-        :active-chat-customer="activeChatCustomer"
+        :active-chat-peer="activeChatPeer"
       >
       </direct-messages>
     </div>
@@ -27,7 +27,7 @@
             NOSTR key-pair
           </li>
           <li>
-            <span class="text-bold">customer</span> - buyer of products with
+            <span class="text-bold">peer</span> - buyer of products with
             NOSTR key-pair
           </li>
           <li>
