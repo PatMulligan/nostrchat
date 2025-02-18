@@ -2,7 +2,7 @@ import asyncio
 import json
 from asyncio import Queue
 from threading import Thread
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 from loguru import logger
 from websocket import WebSocketApp
@@ -75,17 +75,13 @@ class NostrClient:
         self,
         public_keys: List[str],
         dm_time=0,
-        stall_time=0,
-        product_time=0,
         profile_time=0,
     ):
         dm_filters = self._filters_for_direct_messages(public_keys, dm_time)
-        stall_filters = self._filters_for_stall_events(public_keys, stall_time)
-        product_filters = self._filters_for_product_events(public_keys, product_time)
         profile_filters = self._filters_for_user_profile(public_keys, profile_time)
 
         merchant_filters = (
-            dm_filters + stall_filters + product_filters + profile_filters
+            dm_filters + profile_filters
         )
 
         self.subscription_id = "nostrmarket-" + urlsafe_short_hash()[:32]
@@ -97,12 +93,10 @@ class NostrClient:
 
     async def merchant_temp_subscription(self, pk, duration=10):
         dm_filters = self._filters_for_direct_messages([pk], 0)
-        stall_filters = self._filters_for_stall_events([pk], 0)
-        product_filters = self._filters_for_product_events([pk], 0)
         profile_filters = self._filters_for_user_profile([pk], 0)
 
         merchant_filters = (
-            dm_filters + stall_filters + product_filters + profile_filters
+            dm_filters + profile_filters
         )
 
         subscription_id = "merchant-" + urlsafe_short_hash()[:32]
@@ -142,20 +136,6 @@ class NostrClient:
             out_messages_filter["since"] = since
 
         return [in_messages_filter, out_messages_filter]
-
-    def _filters_for_stall_events(self, public_keys: List[str], since: int) -> List:
-        stall_filter = {"kinds": [30017], "authors": public_keys}
-        if since and since != 0:
-            stall_filter["since"] = since
-
-        return [stall_filter]
-
-    def _filters_for_product_events(self, public_keys: List[str], since: int) -> List:
-        product_filter = {"kinds": [30018], "authors": public_keys}
-        if since and since != 0:
-            product_filter["since"] = since
-
-        return [product_filter]
 
     def _filters_for_user_profile(self, public_keys: List[str], since: int) -> List:
         profile_filter = {"kinds": [0], "authors": public_keys}

@@ -6,9 +6,7 @@ window.app = Vue.createApp({
   data: function () {
     return {
       merchant: {},
-      shippingZones: [],
       activeChatCustomer: '',
-      orderPubkey: null,
       showKeys: false,
       importKeyDialog: {
         show: false,
@@ -90,7 +88,6 @@ window.app = Vue.createApp({
     },
     handleMerchantDeleted: function () {
       this.merchant = null
-      this.shippingZones = []
       this.activeChatCustomer = ''
       this.showKeys = false
     },
@@ -134,15 +131,6 @@ window.app = Vue.createApp({
     customerSelectedForOrder: function (customerPubkey) {
       this.activeChatCustomer = customerPubkey
     },
-    filterOrdersForCustomer: function (customerPubkey) {
-      this.orderPubkey = customerPubkey
-    },
-    showOrderDetails: async function (orderData) {
-      await this.$refs.orderListRef.orderSelected(
-        orderData.orderId,
-        orderData.eventId
-      )
-    },
     waitForNotifications: async function () {
       if (!this.merchant) return
       try {
@@ -153,39 +141,9 @@ window.app = Vue.createApp({
         this.wsConnection = new WebSocket(wsUrl)
         this.wsConnection.onmessage = async e => {
           const data = JSON.parse(e.data)
-          if (data.type === 'dm:0') {
-            this.$q.notify({
-              timeout: 5000,
-              type: 'positive',
-              message: 'New Order'
-            })
-
-            await this.$refs.directMessagesRef.handleNewMessage(data)
-            return
-          }
-          if (data.type === 'dm:1') {
-            await this.$refs.directMessagesRef.handleNewMessage(data)
-            await this.$refs.orderListRef.addOrder(data)
-            return
-          }
-          if (data.type === 'dm:2') {
-            const orderStatus = JSON.parse(data.dm.message)
-            this.$q.notify({
-              timeout: 5000,
-              type: 'positive',
-              message: orderStatus.message
-            })
-            if (orderStatus.paid) {
-              await this.$refs.orderListRef.orderPaid(orderStatus.id)
-            }
-            await this.$refs.directMessagesRef.handleNewMessage(data)
-            return
-          }
           if (data.type === 'dm:-1') {
             await this.$refs.directMessagesRef.handleNewMessage(data)
           }
-          // order paid
-          // order shipped
         }
       } catch (error) {
         this.$q.notify({
