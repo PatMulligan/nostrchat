@@ -128,9 +128,14 @@ window.app = Vue.createApp({
         LNbits.utils.notifyApiError(error)
       }
     },
+    // TODO: remove this
     customerSelectedForOrder: function (customerPubkey) {
       this.activeChatCustomer = customerPubkey
     },
+    // TODO: remove this
+    // filterOrdersForCustomer: function (customerPubkey) {
+    //   this.orderPubkey = customerPubkey
+    // },
     waitForNotifications: async function () {
       if (!this.merchant) return
       try {
