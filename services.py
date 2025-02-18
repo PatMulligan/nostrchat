@@ -112,7 +112,7 @@ async def _handle_nip04_message(event: NostrEvent):
             nostracct_public_key = p_tags[0]
             nostracct = await get_nostracct_by_pubkey(nostracct_public_key)
 
-    assert nostracct, f"NostrAcct not found for public key '{nostracct_public_key}'"
+    assert nostracct, f"Nostr Account not found for public key '{nostracct_public_key}'"
 
     if event.pubkey == nostracct_public_key:
         assert len(event.tag_values("p")) != 0, "Outgong message has no 'p' tag"

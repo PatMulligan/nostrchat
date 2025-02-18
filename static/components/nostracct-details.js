@@ -20,7 +20,7 @@ window.app.component('nostracct-details', {
         )
         this.$q.notify({
           type: 'positive',
-          message: 'NostrAcct data republished to Nostr',
+          message: 'Nostr Account data republished to Nostr',
           timeout: 5000
         })
       } catch (error) {
@@ -37,7 +37,7 @@ window.app.component('nostracct-details', {
         )
         this.$q.notify({
           type: 'positive',
-          message: 'NostrAcct data refreshed from Nostr',
+          message: 'Nostr Account data refreshed from Nostr',
           timeout: 5000
         })
       } catch (error) {
@@ -63,7 +63,7 @@ window.app.component('nostracct-details', {
             this.$emit('nostracct-deleted', this.nostracctId)
             this.$q.notify({
               type: 'positive',
-              message: 'NostrAcct Deleted',
+              message: 'Nostr Account Deleted',
               timeout: 5000
             })
           } catch (error) {
@@ -88,7 +88,7 @@ window.app.component('nostracct-details', {
             )
             this.$q.notify({
               type: 'positive',
-              message: 'NostrAcct Deleted from Nostr',
+              message: 'Nostr Account Deleted from Nostr',
               timeout: 5000
             })
           } catch (error) {
@@ -98,5 +98,5 @@ window.app.component('nostracct-details', {
         })
     }
   },
-  created: async function () {}
+  created: async function () { }
 })
