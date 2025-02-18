@@ -110,7 +110,7 @@ window.app = Vue.createApp({
         this.nostracct = data
         this.$q.notify({
           type: 'positive',
-          message: 'NostrAcct Created!'
+          message: 'Nostr Account Created!'
         })
         this.waitForNotifications()
       } catch (error) {
