@@ -67,6 +67,8 @@ window.app = Vue.createApp({
         await this.toggleMerchant()
       })
     },
+    // NOTE: Leaving toggle functionality for now
+    // in the case it makes sense to handle nostrMarket and other extension chats altogether
     toggleMerchant: async function () {
       try {
         const {data} = await LNbits.api.request(
