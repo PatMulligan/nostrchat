@@ -14,7 +14,7 @@ from lnbits.decorators import (
 # from lnbits.utils.exchange_rates import currencies
 from loguru import logger
 
-from . import nostr_client, nostrmarket_ext
+from . import nostr_client, nostrchat_ext
 from .crud import (
     create_customer,
     create_direct_message,
@@ -48,7 +48,7 @@ from .services import (
 ######################################## MERCHANT ######################################
 
 
-@nostrmarket_ext.post("/api/v1/nostracct")
+@nostrchat_ext.post("/api/v1/nostracct")
 async def api_create_nostracct(
     data: PartialNostrAcct,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -81,7 +81,7 @@ async def api_create_nostracct(
         ) from ex
 
 
-@nostrmarket_ext.get("/api/v1/nostracct")
+@nostrchat_ext.get("/api/v1/nostracct")
 async def api_get_nostracct(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
 ) -> Optional[NostrAcct]:
@@ -106,7 +106,7 @@ async def api_get_nostracct(
         ) from ex
 
 
-@nostrmarket_ext.delete("/api/v1/nostracct/{nostracct_id}")
+@nostrchat_ext.delete("/api/v1/nostracct/{nostracct_id}")
 async def api_delete_nostracct(
     nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -137,7 +137,7 @@ async def api_delete_nostracct(
         await subscribe_to_all_nostraccts()
 
 
-@nostrmarket_ext.put("/api/v1/nostracct/{nostracct_id}/nostr")
+@nostrchat_ext.put("/api/v1/nostracct/{nostracct_id}/nostr")
 async def api_republish_nostracct(
     nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -163,7 +163,7 @@ async def api_republish_nostracct(
         ) from ex
 
 
-@nostrmarket_ext.get("/api/v1/nostracct/{nostracct_id}/nostr")
+@nostrchat_ext.get("/api/v1/nostracct/{nostracct_id}/nostr")
 async def api_refresh_nostracct(
     nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -188,7 +188,7 @@ async def api_refresh_nostracct(
         ) from ex
 
 
-@nostrmarket_ext.put("/api/v1/nostracct/{nostracct_id}/toggle")
+@nostrchat_ext.put("/api/v1/nostracct/{nostracct_id}/toggle")
 async def api_toggle_nostracct(
     nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -215,7 +215,7 @@ async def api_toggle_nostracct(
         ) from ex
 
 
-@nostrmarket_ext.delete("/api/v1/nostracct/{nostracct_id}/nostr")
+@nostrchat_ext.delete("/api/v1/nostracct/{nostracct_id}/nostr")
 async def api_delete_nostracct_on_nostr(
     nostracct_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -244,7 +244,7 @@ async def api_delete_nostracct_on_nostr(
 ######################################## DIRECT MESSAGES ###############################
 
 
-@nostrmarket_ext.get("/api/v1/message/{public_key}")
+@nostrchat_ext.get("/api/v1/message/{public_key}")
 async def api_get_messages(
     public_key: str, wallet: WalletTypeInfo = Depends(require_invoice_key)
 ) -> List[DirectMessage]:
@@ -268,7 +268,7 @@ async def api_get_messages(
         ) from ex
 
 
-@nostrmarket_ext.post("/api/v1/message")
+@nostrchat_ext.post("/api/v1/message")
 async def api_create_message(
     data: PartialDirectMessage, wallet: WalletTypeInfo = Depends(require_admin_key)
 ) -> DirectMessage:
@@ -300,7 +300,7 @@ async def api_create_message(
 ######################################## CUSTOMERS #####################################
 
 
-@nostrmarket_ext.get("/api/v1/customer")
+@nostrchat_ext.get("/api/v1/customer")
 async def api_get_customers(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
 ) -> List[Customer]:
@@ -322,7 +322,7 @@ async def api_get_customers(
         ) from ex
 
 
-@nostrmarket_ext.post("/api/v1/customer")
+@nostrchat_ext.post("/api/v1/customer")
 async def api_create_customer(
     data: Customer,
     wallet: WalletTypeInfo = Depends(require_admin_key),
@@ -361,12 +361,12 @@ async def api_create_customer(
 ######################################## OTHER ########################################
 
 
-@nostrmarket_ext.get("/api/v1/currencies")
+@nostrchat_ext.get("/api/v1/currencies")
 async def api_list_currencies_available():
     return list(currencies.keys())
 
 
-@nostrmarket_ext.put("/api/v1/restart")
+@nostrchat_ext.put("/api/v1/restart")
 async def restart_nostr_client(wallet: WalletTypeInfo = Depends(require_admin_key)):
     try:
         await nostr_client.restart()

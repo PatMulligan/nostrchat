@@ -18,7 +18,7 @@ class NostrClient:
         self.recieve_event_queue: Queue = Queue()
         self.send_req_queue: Queue = Queue()
         self.ws: Optional[WebSocketApp] = None
-        self.subscription_id = "nostrmarket-" + urlsafe_short_hash()[:32]
+        self.subscription_id = "nostrchat-" + urlsafe_short_hash()[:32]
         self.running = False
 
     @property
@@ -84,7 +84,7 @@ class NostrClient:
             dm_filters + profile_filters
         )
 
-        self.subscription_id = "nostrmarket-" + urlsafe_short_hash()[:32]
+        self.subscription_id = "nostrchat-" + urlsafe_short_hash()[:32]
         await self.send_req_queue.put(["REQ", self.subscription_id] + nostracct_filters)
 
         logger.debug(

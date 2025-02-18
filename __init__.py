@@ -8,20 +8,20 @@ from loguru import logger
 
 from .nostr.nostr_client import NostrClient
 
-db = Database("ext_nostrmarket")
+db = Database("ext_nostrchat")
 
-nostrmarket_ext: APIRouter = APIRouter(prefix="/nostrmarket", tags=["nostrmarket"])
+nostrchat_ext: APIRouter = APIRouter(prefix="/nostrchat", tags=["nostrchat"])
 
-nostrmarket_static_files = [
+nostrchat_static_files = [
     {
-        "path": "/nostrmarket/static",
-        "name": "nostrmarket_static",
+        "path": "/nostrchat/static",
+        "name": "nostrchat_static",
     }
 ]
 
 
-def nostrmarket_renderer():
-    return template_renderer(["nostrmarket/templates"])
+def nostrchat_renderer():
+    return template_renderer(["nostrchat/templates"])
 
 
 nostr_client: NostrClient = NostrClient()
@@ -34,7 +34,7 @@ from .views_api import *  # noqa
 scheduled_tasks: list[asyncio.Task] = []
 
 
-async def nostrmarket_stop():
+async def nostrchat_stop():
     for task in scheduled_tasks:
         try:
             task.cancel()
@@ -44,7 +44,7 @@ async def nostrmarket_stop():
     await nostr_client.stop()
 
 
-def nostrmarket_start():
+def nostrchat_start():
 
     async def _subscribe_to_nostr_client():
         # wait for 'nostrclient' extension to initialize
@@ -57,9 +57,9 @@ def nostrmarket_start():
         await wait_for_nostr_events(nostr_client)
 
     task1 = create_permanent_unique_task(
-        "ext_nostrmarket_subscribe_to_nostr_client", _subscribe_to_nostr_client
+        "ext_nostrchat_subscribe_to_nostr_client", _subscribe_to_nostr_client
     )
     task2 = create_permanent_unique_task(
-        "ext_nostrmarket_wait_for_events", _wait_for_nostr_events
+        "ext_nostrchat_wait_for_events", _wait_for_nostr_events
     )
     scheduled_tasks.extend([task1, task2])

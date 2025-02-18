@@ -4,7 +4,7 @@ async def m001_initial(db):
     """
     await db.execute(
         """
-        CREATE TABLE nostrmarket.nostraccts (
+        CREATE TABLE nostrchat.nostraccts (
             user_id TEXT NOT NULL,
             id TEXT PRIMARY KEY,
             private_key TEXT NOT NULL,
@@ -20,7 +20,7 @@ async def m001_initial(db):
     """
     await db.execute(
         f"""
-        CREATE TABLE nostrmarket.direct_messages (
+        CREATE TABLE nostrchat.direct_messages (
             nostracct_id TEXT NOT NULL,
             id TEXT PRIMARY KEY,
             event_id TEXT,
@@ -42,11 +42,11 @@ async def m001_initial(db):
         await db.execute(
             """
             CREATE INDEX idx_messages_timestamp
-            ON nostrmarket.direct_messages (time DESC)
+            ON nostrchat.direct_messages (time DESC)
             """
         )
         await db.execute(
-            "CREATE INDEX idx_event_id ON nostrmarket.direct_messages (event_id)"
+            "CREATE INDEX idx_event_id ON nostrchat.direct_messages (event_id)"
         )
 
     """
@@ -54,7 +54,7 @@ async def m001_initial(db):
     """
     await db.execute(
         """
-        CREATE TABLE nostrmarket.customers (
+        CREATE TABLE nostrchat.customers (
             nostracct_id TEXT NOT NULL,
             public_key TEXT NOT NULL,
             event_created_at INTEGER,

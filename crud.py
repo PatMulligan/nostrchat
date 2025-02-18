@@ -21,7 +21,7 @@ async def create_nostracct(user_id: str, m: PartialNostrAcct) -> NostrAcct:
     nostracct_id = urlsafe_short_hash()
     await db.execute(
         """
-        INSERT INTO nostrmarket.nostraccts
+        INSERT INTO nostrchat.nostraccts
                (user_id, id, private_key, public_key, meta)
         VALUES (:user_id, :id, :private_key, :public_key, :meta)
         """,
@@ -43,7 +43,7 @@ async def update_nostracct(
 ) -> Optional[NostrAcct]:
     await db.execute(
         f"""
-            UPDATE nostrmarket.nostraccts SET meta = :meta, time = {db.timestamp_now}
+            UPDATE nostrchat.nostraccts SET meta = :meta, time = {db.timestamp_now}
             WHERE id = :id AND user_id = :user_id
         """,
         {"meta": json.dumps(config.dict()), "id": nostracct_id, "user_id": user_id},
@@ -54,7 +54,7 @@ async def update_nostracct(
 async def touch_nostracct(user_id: str, nostracct_id: str) -> Optional[NostrAcct]:
     await db.execute(
         f"""
-            UPDATE nostrmarket.nostraccts SET time = {db.timestamp_now}
+            UPDATE nostrchat.nostraccts SET time = {db.timestamp_now}
             WHERE id = :id AND user_id = :user_id
         """,
         {"id": nostracct_id, "user_id": user_id},
@@ -64,7 +64,7 @@ async def touch_nostracct(user_id: str, nostracct_id: str) -> Optional[NostrAcct
 
 async def get_nostracct(user_id: str, nostracct_id: str) -> Optional[NostrAcct]:
     row: dict = await db.fetchone(
-        """SELECT * FROM nostrmarket.nostraccts WHERE user_id = :user_id AND id = :id""",
+        """SELECT * FROM nostrchat.nostraccts WHERE user_id = :user_id AND id = :id""",
         {
             "user_id": user_id,
             "id": nostracct_id,
@@ -76,7 +76,7 @@ async def get_nostracct(user_id: str, nostracct_id: str) -> Optional[NostrAcct]:
 
 async def get_nostracct_by_pubkey(public_key: str) -> Optional[NostrAcct]:
     row: dict = await db.fetchone(
-        """SELECT * FROM nostrmarket.nostraccts WHERE public_key = :public_key""",
+        """SELECT * FROM nostrchat.nostraccts WHERE public_key = :public_key""",
         {"public_key": public_key},
     )
 
@@ -85,7 +85,7 @@ async def get_nostracct_by_pubkey(public_key: str) -> Optional[NostrAcct]:
 
 async def get_nostraccts_ids_with_pubkeys() -> List[Tuple[str, str]]:
     rows: list[dict] = await db.fetchall(
-        """SELECT id, public_key FROM nostrmarket.nostraccts""",
+        """SELECT id, public_key FROM nostrchat.nostraccts""",
     )
 
     return [(row["id"], row["public_key"]) for row in rows]
@@ -93,7 +93,7 @@ async def get_nostraccts_ids_with_pubkeys() -> List[Tuple[str, str]]:
 
 async def get_nostracct_for_user(user_id: str) -> Optional[NostrAcct]:
     row: dict = await db.fetchone(
-        """SELECT * FROM nostrmarket.nostraccts WHERE user_id = :user_id """,
+        """SELECT * FROM nostrchat.nostraccts WHERE user_id = :user_id """,
         {"user_id": user_id},
     )
 
@@ -102,7 +102,7 @@ async def get_nostracct_for_user(user_id: str) -> Optional[NostrAcct]:
 
 async def delete_nostracct(nostracct_id: str) -> None:
     await db.execute(
-        "DELETE FROM nostrmarket.nostraccts WHERE id = :id",
+        "DELETE FROM nostrchat.nostraccts WHERE id = :id",
         {
             "id": nostracct_id,
         },
@@ -118,7 +118,7 @@ async def create_direct_message(
     dm_id = urlsafe_short_hash()
     await db.execute(
         """
-        INSERT INTO nostrmarket.direct_messages
+        INSERT INTO nostrchat.direct_messages
         (
             nostracct_id, id, event_id, event_created_at,
             message, public_key, type, incoming
@@ -152,7 +152,7 @@ async def create_direct_message(
 async def get_direct_message(nostracct_id: str, dm_id: str) -> Optional[DirectMessage]:
     row: dict = await db.fetchone(
         """
-            SELECT * FROM nostrmarket.direct_messages
+            SELECT * FROM nostrchat.direct_messages
             WHERE nostracct_id = :nostracct_id AND id = :id
         """,
         {
@@ -168,7 +168,7 @@ async def get_direct_message_by_event_id(
 ) -> Optional[DirectMessage]:
     row: dict = await db.fetchone(
         """
-        SELECT * FROM nostrmarket.direct_messages
+        SELECT * FROM nostrchat.direct_messages
         WHERE nostracct_id = :nostracct_id AND event_id = :event_id
         """,
         {
@@ -182,7 +182,7 @@ async def get_direct_message_by_event_id(
 async def get_direct_messages(nostracct_id: str, public_key: str) -> List[DirectMessage]:
     rows: list[dict] = await db.fetchall(
         """
-        SELECT * FROM nostrmarket.direct_messages
+        SELECT * FROM nostrchat.direct_messages
         WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         ORDER BY event_created_at
         """,
@@ -194,7 +194,7 @@ async def get_direct_messages(nostracct_id: str, public_key: str) -> List[Direct
 async def get_orders_from_direct_messages(nostracct_id: str) -> List[DirectMessage]:
     rows: list[dict] = await db.fetchall(
         """
-        SELECT * FROM nostrmarket.direct_messages
+        SELECT * FROM nostrchat.direct_messages
         WHERE nostracct_id = :nostracct_id AND type >= 0 ORDER BY event_created_at, type
         """,
         {"nostracct_id": nostracct_id},
@@ -205,7 +205,7 @@ async def get_orders_from_direct_messages(nostracct_id: str) -> List[DirectMessa
 async def get_last_direct_messages_time(nostracct_id: str) -> int:
     row: dict = await db.fetchone(
         """
-            SELECT time FROM nostrmarket.direct_messages
+            SELECT time FROM nostrchat.direct_messages
             WHERE nostracct_id = :nostracct_id ORDER BY time DESC LIMIT 1
         """,
         {"nostracct_id": nostracct_id},
@@ -216,7 +216,7 @@ async def get_last_direct_messages_time(nostracct_id: str) -> int:
 async def get_last_direct_messages_created_at() -> int:
     row: dict = await db.fetchone(
         """
-            SELECT event_created_at FROM nostrmarket.direct_messages
+            SELECT event_created_at FROM nostrchat.direct_messages
             ORDER BY event_created_at DESC LIMIT 1
         """,
         {},
@@ -226,7 +226,7 @@ async def get_last_direct_messages_created_at() -> int:
 
 async def delete_nostracct_direct_messages(nostracct_id: str) -> None:
     await db.execute(
-        "DELETE FROM nostrmarket.direct_messages WHERE nostracct_id = :nostracct_id",
+        "DELETE FROM nostrchat.direct_messages WHERE nostracct_id = :nostracct_id",
         {"nostracct_id": nostracct_id},
     )
 
@@ -237,7 +237,7 @@ async def delete_nostracct_direct_messages(nostracct_id: str) -> None:
 async def create_customer(nostracct_id: str, data: Customer) -> Customer:
     await db.execute(
         """
-        INSERT INTO nostrmarket.customers (nostracct_id, public_key, meta)
+        INSERT INTO nostrchat.customers (nostracct_id, public_key, meta)
         VALUES (:nostracct_id, :public_key, :meta)
         """,
         {
@@ -255,7 +255,7 @@ async def create_customer(nostracct_id: str, data: Customer) -> Customer:
 async def get_customer(nostracct_id: str, public_key: str) -> Optional[Customer]:
     row: dict = await db.fetchone(
         """
-            SELECT * FROM nostrmarket.customers
+            SELECT * FROM nostrchat.customers
             WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         """,
         {
@@ -268,7 +268,7 @@ async def get_customer(nostracct_id: str, public_key: str) -> Optional[Customer]
 
 async def get_customers(nostracct_id: str) -> List[Customer]:
     rows: list[dict] = await db.fetchall(
-        "SELECT * FROM nostrmarket.customers WHERE nostracct_id = :nostracct_id",
+        "SELECT * FROM nostrchat.customers WHERE nostracct_id = :nostracct_id",
         {"nostracct_id": nostracct_id},
     )
     return [Customer.from_row(row) for row in rows]
@@ -277,7 +277,7 @@ async def get_customers(nostracct_id: str) -> List[Customer]:
 async def get_all_unique_customers() -> List[Customer]:
     q = """
             SELECT public_key, MAX(nostracct_id) as nostracct_id, MAX(event_created_at)
-            FROM nostrmarket.customers
+            FROM nostrchat.customers
             GROUP BY public_key
         """
     rows: list[dict] = await db.fetchall(q)
@@ -289,7 +289,7 @@ async def update_customer_profile(
 ):
     await db.execute(
         """
-        UPDATE nostrmarket.customers
+        UPDATE nostrchat.customers
         SET event_created_at = :event_created_at, meta = :meta
         WHERE public_key = :public_key
         """,
@@ -304,7 +304,7 @@ async def update_customer_profile(
 async def increment_customer_unread_messages(nostracct_id: str, public_key: str):
     await db.execute(
         """
-        UPDATE nostrmarket.customers
+        UPDATE nostrchat.customers
         SET unread_messages = unread_messages + 1
         WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         """,
@@ -319,7 +319,7 @@ async def increment_customer_unread_messages(nostracct_id: str, public_key: str)
 async def update_customer_no_unread_messages(nostracct_id: str, public_key: str):
     await db.execute(
         """
-        UPDATE nostrmarket.customers
+        UPDATE nostrchat.customers
         SET unread_messages = 0
         WHERE nostracct_id = :nostracct_id AND public_key = :public_key
         """,
