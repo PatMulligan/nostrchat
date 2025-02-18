@@ -60,7 +60,7 @@ window.app = Vue.createApp({
         ? 'New orders will not be processed. Are you sure you want to deactivate?'
         : merchant.config.restore_in_progress
           ? 'Merchant restore  from nostr in progress. Please wait!! ' +
-            'Activating now can lead to duplicate order processing. Click "OK" if you want to activate anyway?'
+          'Activating now can lead to duplicate order processing. Click "OK" if you want to activate anyway?'
           : 'Are you sure you want activate this merchant?'
 
       LNbits.utils.confirmDialog(message).onOk(async () => {
@@ -71,7 +71,7 @@ window.app = Vue.createApp({
     // in the case it makes sense to handle nostrMarket and other extension chats altogether
     toggleMerchant: async function () {
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'PUT',
           `/nostrmarket/api/v1/merchant/${this.merchant.id}/toggle`,
           this.g.user.wallets[0].adminkey
@@ -101,7 +101,7 @@ window.app = Vue.createApp({
           public_key: pubkey,
           config: {}
         }
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'POST',
           '/nostrmarket/api/v1/merchant',
           this.g.user.wallets[0].adminkey,
@@ -119,7 +119,7 @@ window.app = Vue.createApp({
     },
     getMerchant: async function () {
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'GET',
           '/nostrmarket/api/v1/merchant',
           this.g.user.wallets[0].inkey
