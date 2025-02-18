@@ -1,7 +1,7 @@
 {
   "name": "Nostr Chat",
   "short_description": "Nostr Chat on LNbits",
-  "tile": "/nostrchat/static/images/bitcoin-shop.png",
+  "tile": "/nostrchat/static/images/nostrchat.png",
   "min_lnbits_version": "1.0.0",
   "contributors": [
     {
