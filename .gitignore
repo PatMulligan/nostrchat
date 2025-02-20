@@ -23,3 +23,8 @@ node_modules
 *.pyo
 *.pyc
 *.env
+
+# TODO: remove this
+# misc cursor stuff
+.specstory
+
