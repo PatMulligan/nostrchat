@@ -2,6 +2,14 @@
   <q-card-section class="q-pa-none">
     <!-- Header -->
     <q-toolbar class="bg-primary text-white">
+      <q-btn
+        v-if="$q.screen.lt.md"
+        flat
+        round
+        dense
+        icon="arrow_back"
+        @click="$emit('back')"
+      />
       <q-toolbar-title>
         <span v-if="activePublicKey" v-text="activePeerName"></span>
         <span v-else>Select a peer to start chatting</span>

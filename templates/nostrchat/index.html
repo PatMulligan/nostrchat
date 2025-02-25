@@ -4,22 +4,7 @@
   <div class="col-12 col-md-7 q-gutter-y-md">
 
     <div v-if="nostracct && nostracct.id" class="col-12">
-      <div class="row q-col-gutter-md full-height">
-        <!-- Mobile view switcher -->
-        <div
-          class="col-12 q-mb-md"
-          v-if="$q.screen.lt.md && activePublicKey"
-        >
-          <q-btn
-            flat
-            round
-            icon="arrow_back"
-            color="primary"
-            @click="handleBackToList"
-          />
-          <span class="q-ml-sm" v-text="activePeerName"></span>
-        </div>
-
+      <div class="row q-col-gutter-md">
         <!-- Peers list -->
         <div
           class="col-12 col-md-3"
@@ -46,6 +31,7 @@
             :active-public-key="activePublicKey"
             :peers="peers"
             @refresh-peers="refreshPeers"
+            @back="handleBackToList"
           />
         </div>
       </div>
