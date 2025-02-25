@@ -96,6 +96,7 @@ window.app.component('direct-messages', {
         const { data } = await LNbits.api.request(
           'POST',
           '/nostrchat/api/v1/message',
+          this.adminkey,
           {
             message: this.newMessage,
             public_key: this.activePublicKey
@@ -114,6 +115,7 @@ window.app.component('direct-messages', {
         const { data } = await LNbits.api.request(
           'POST',
           '/nostrchat/api/v1/peer',
+          this.adminkey,
           {
             public_key: this.newPublicKey,
             nostracct_id: this.nostracctId,
