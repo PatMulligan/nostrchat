@@ -13,7 +13,13 @@ const lnbitsExtensionPractices = [
     "Never use Jinja2 template expressions ({{ }}) in Vue component templates",
     "Use v-text, v-bind, or v-html directives instead of interpolation in component templates",
     "Keep Jinja2 expressions only in the main index.html file",
-    "Use proper escaping when mixing template languages"
+    "Use proper escaping when mixing template languages",
+    "Always use v-text or v-bind instead of interpolation syntax",
+    "Never mix Vue.js operators with Jinja2 template syntax",
+    "Keep all JavaScript expressions inside Vue directives",
+    "Use computed properties for complex template logic",
+    "Component templates must be pure Vue.js without Jinja2 expressions",
+    "Handle null/undefined values with Vue.js operators inside v-text/v-bind"
 ];
 
 // Quasar Framework best practices for LNBits extensions
@@ -420,6 +426,11 @@ const templateSyntaxRules = [
     "Use v-text='value' instead of {{ value }}",
     "Use :attribute='value' instead of {{ value }}",
     "Use v-html='value' for HTML content",
+    "Never use {{ }} interpolation in Vue component templates",
+    "Use v-text for text content even with JavaScript expressions (e.g., v-text=\"value || 'default'\")",
+    "Use :prop for binding props even with JavaScript expressions (e.g., :value=\"item.value || ''\")",
+    "Keep all JavaScript expressions inside v-text, v-bind, or other Vue directives",
+    "Use computed properties for complex expressions instead of inline template logic",
     
     // Jinja2 expressions in index.html
     "Use {% block %} for template inheritance",
@@ -429,7 +440,11 @@ const templateSyntaxRules = [
     // Mixing template languages
     "Keep Vue.js and Jinja2 expressions separate",
     "Use v-text when displaying dynamic content in components",
-    "Use proper component props instead of passing Jinja variables directly"
+    "Use proper component props instead of passing Jinja variables directly",
+    "Never mix Vue.js operators with Jinja2 syntax",
+    "Always use v-text, v-bind, or other Vue directives when JavaScript operators are needed",
+    "Component templates should never contain Jinja2 expressions",
+    "Keep all Jinja2 templating in index.html or layout files only"
 ];
 
 // Example of proper template usage
@@ -439,6 +454,11 @@ const templateExample = `
   {{ window_vars(user) }}
   <script src="{{ static_url_for('extension/static', 'js/components/Component.js') }}"></script>
 {% endblock %}
+<!-- INCORRECT - Don't use interpolation with JS operators -->
+<q-item-label>{{ peer.profile.name || 'unknown' }}</q-item-label>
+
+<!-- CORRECT - Use v-text with JS operators -->
+<q-item-label v-text="peer.profile.name || 'unknown'"></q-item-label>
 
 <!-- In component template (Vue.js) -->
 <template id="component-template">
@@ -449,6 +469,21 @@ const templateExample = `
     </div>
   </div>
 </template>
+<!-- INCORRECT - Don't mix Vue and Jinja syntax -->
+<q-input value="{{ some_jinja_var }}"></q-input>
+
+<!-- CORRECT - Use proper Vue binding -->
+<q-input :value="someVueData"></q-input>
+
+<!-- CORRECT - Complex logic in computed properties -->
+<q-item-label v-text="formattedName"></q-item-label>
+
+<!-- computed property example -->
+computed: {
+  formattedName() {
+    return this.peer.profile.name || 'unknown'
+  }
+}
 `;
 
 // Example of component registration
