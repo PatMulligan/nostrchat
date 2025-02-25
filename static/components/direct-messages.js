@@ -3,10 +3,6 @@ window.app.component('direct-messages', {
   template: '#direct-messages',
 
   props: {
-    activeChatPeer: {
-      type: String,
-      default: ''
-    },
     nostracctId: {
       type: String,
       required: true
@@ -131,17 +127,6 @@ window.app.component('direct-messages', {
       }
     },
 
-    buildPeerLabel: function (c) {
-      let label = `${c.profile.name || 'unknown'} ${c.profile.about || ''}`
-      if (c.unread_messages) {
-        label += `[new: ${c.unread_messages}]`
-      }
-      label += `  (${c.public_key.slice(0, 16)}...${c.public_key.slice(
-        c.public_key.length - 16
-      )}`
-      return label
-    },
-
     handleNewMessage: async function (data) {
       if (data.peerPubkey === this.activePublicKey) {
         this.messages.push(data.dm)
@@ -149,14 +134,6 @@ window.app.component('direct-messages', {
         // focus back on input box
       }
       this.getPeersDebounced()
-    },
-
-    showOrderDetails: function (orderId, eventId) {
-      this.$emit('order-selected', { orderId, eventId })
-    },
-
-    showClientOrders: function () {
-      this.$emit('peer-selected', this.activePublicKey)
     },
 
     selectActivePeer: async function () {
@@ -177,12 +154,6 @@ window.app.component('direct-messages', {
   },
 
   watch: {
-    activeChatPeer: {
-      immediate: true,
-      async handler(newVal) {
-        this.activePublicKey = newVal
-      }
-    },
     activePublicKey: {
       immediate: true,
       async handler(newVal) {

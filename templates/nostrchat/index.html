@@ -29,6 +29,10 @@
   >{% include("nostrchat/components/nostracct-details.html") %}</template
 >
 
+<template id="peers-list">
+  {% include "nostrchat/components/peers-list.html" %}
+</template>
+
 <!-- Regular scripts -->
 <script src="{{ url_for('nostrchat_static', path='js/nostr.bundle.js') }}"></script>
 <script src="{{ url_for('nostrchat_static', path='js/utils.js') }}"></script>
@@ -40,6 +44,7 @@
 <script src="{{ static_url_for('nostrchat/static', 'components/direct-messages.js') }}"></script>
 <script src="{{ static_url_for('nostrchat/static', 'components/key-pair.js') }}"></script>
 <script src="{{ static_url_for('nostrchat/static', 'components/nostracct-details.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/peers-list.js') }}"></script>
 
 {% endblock %}
 
@@ -48,14 +53,28 @@
   <div class="col-12 col-md-7 q-gutter-y-md">
 
     <div v-if="nostracct && nostracct.id" class="col-12">
-      <direct-messages
-        ref="directMessagesRef"
-        v-bind:inkey="g.user.wallets[0].inkey"
-        v-bind:adminkey="g.user.wallets[0].adminkey"
-        v-bind:active-chat-peer="activeChatPeer"
-        v-bind:nostracct-id="nostracct.id"
-      >
-      </direct-messages>
+      <q-card>
+        <q-card-section class="row q-col-gutter-md">
+          <div class="col-3">
+            <peers-list
+              :peers="peers"
+              :active-public-key="activePublicKey"
+              @peer-selected="handlePeerSelected"
+              @show-add-peer="showAddPeer = true"
+            />
+          </div>
+          <div class="col-9">
+            <direct-messages
+              ref="directMessagesRef"
+              :inkey="g.user.wallets[0].inkey"
+              :adminkey="g.user.wallets[0].adminkey"
+              :nostracct-id="nostracct.id"
+              :active-public-key="activePublicKey"
+              @refresh-peers="refreshPeers"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
     </div>
 
     <q-card v-else>
@@ -213,5 +232,31 @@
       </q-card>
     </q-dialog>
   </div>
+
+  <!-- Add peer dialog -->
+  <q-dialog v-model="showAddPeer" position="top">
+    <q-card class="q-pa-lg q-pt-xl" style="width: 500px">
+      <q-form @submit="addPeer" class="q-gutter-md">
+        <q-input
+          filled
+          dense
+          v-model.trim="newPeerKey"
+          label="Public Key (hex or npub)"
+        ></q-input>
+        <div class="row q-mt-lg">
+          <q-btn
+            unelevated
+            color="primary"
+            :disable="!newPeerKey"
+            type="submit"
+            >Add</q-btn
+          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+            >Cancel</q-btn
+          >
+        </div>
+      </q-form>
+    </q-card>
+  </q-dialog>
 </div>
 {% endblock %}

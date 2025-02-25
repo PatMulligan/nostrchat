@@ -1,0 +1,40 @@
+<div class="peers-list">
+  <div class="row q-mb-md">
+    <div class="col-8">
+      <h6 class="text-subtitle1 q-my-none">Messages</h6>
+      <q-badge v-if="unreadMessages" color="primary" outline>
+        <span v-text="unreadMessages"></span>&nbsp; new
+      </q-badge>
+    </div>
+    <div class="col-4">
+      <q-btn
+        label="Add"
+        color="primary"
+        class="float-right"
+        @click="$emit('show-add-peer')"
+      >
+        <q-tooltip>Add a public key to chat with</q-tooltip>
+      </q-btn>
+    </div>
+  </div>
+
+  <q-list separator>
+    <q-item
+      v-for="peer in peers"
+      :key="peer.public_key"
+      clickable
+      :active="peer.public_key === activePublicKey"
+      @click="$emit('peer-selected', peer.public_key)"
+      v-ripple
+    >
+      <q-item-section>
+        <q-item-label v-text="peer.profile.name || 'unknown'"></q-item-label>
+        <q-item-label caption v-text="peer.profile.about || ''"></q-item-label>
+        <q-item-label caption class="text-truncate" v-text="peer.public_key"></q-item-label>
+      </q-item-section>
+      <q-item-section side v-if="peer.unread_messages">
+        <q-badge color="primary" v-text="peer.unread_messages"></q-badge>
+      </q-item-section>
+    </q-item>
+  </q-list>
+</div> 

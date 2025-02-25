@@ -7,7 +7,6 @@ window.app = Vue.createApp({
   data() {
     return {
       nostracct: null,
-      activeChatPeer: '',
       showKeys: false,
       importKeyDialog: {
         show: false,
@@ -15,7 +14,11 @@ window.app = Vue.createApp({
           privateKey: ''
         }
       },
-      wsConnection: null
+      wsConnection: null,
+      peers: [],
+      activePublicKey: null,
+      showAddPeer: false,
+      newPeerKey: null
     }
   },
 
@@ -93,7 +96,6 @@ window.app = Vue.createApp({
 
     handleNostrAcctDeleted: function () {
       this.nostracct = null
-      this.activeChatPeer = ''
       this.showKeys = false
     },
 
@@ -170,6 +172,49 @@ window.app = Vue.createApp({
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
+    },
+
+    async getPeers() {
+      try {
+        const { data } = await LNbits.api.request(
+          'GET',
+          '/nostrchat/api/v1/peer',
+          this.g.user.wallets[0].inkey
+        )
+        this.peers = data
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      }
+    },
+
+    async addPeer() {
+      try {
+        const { data } = await LNbits.api.request(
+          'POST',
+          '/nostrchat/api/v1/peer',
+          this.g.user.wallets[0].adminkey,
+          {
+            public_key: this.newPeerKey,
+            nostracct_id: this.nostracct.id,
+            unread_messages: 0
+          }
+        )
+        this.newPeerKey = null
+        this.activePublicKey = data.public_key
+        await this.getPeers()
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      } finally {
+        this.showAddPeer = false
+      }
+    },
+
+    handlePeerSelected(publicKey) {
+      this.activePublicKey = publicKey
+    },
+
+    refreshPeers() {
+      this.getPeers()
     }
   },
 
@@ -181,6 +226,17 @@ window.app = Vue.createApp({
         this.waitForNotifications()
       }
     }, 1000)
+  },
+
+  watch: {
+    'nostracct.id': {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.getPeers()
+        }
+      }
+    }
   }
 })
 
