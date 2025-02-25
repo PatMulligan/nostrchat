@@ -62,15 +62,21 @@ window.app.component('nostracct-details', {
         LNbits.utils.notifyApiError(error)
       }
     },
+
     async deleteNostrAcct() {
       try {
-        await LNbits.utils.confirmDialog('Are you sure you want to delete this Nostr Account?')
-        await LNbits.api.request(
-          'DELETE',
-          `/nostrchat/api/v1/nostracct/${this.nostracctId}`,
-          this.adminkey
-        )
-        this.$emit('nostracct-deleted')
+        await LNbits.utils
+          .confirmDialog(
+            'Are you sure you want to delete this Nostr Account?'
+          )
+          .onOk(async () => {
+            await LNbits.api.request(
+              'DELETE',
+              `/nostrchat/api/v1/nostracct/${this.nostracctId}`,
+              this.adminkey
+            )
+            this.$emit('nostracct-deleted')
+          })
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
