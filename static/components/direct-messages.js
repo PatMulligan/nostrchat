@@ -1,6 +1,6 @@
 window.app.component('direct-messages', {
   name: 'DirectMessages',
-  
+
   props: {
     activeChatPeer: {
       type: String,
@@ -12,7 +12,7 @@ window.app.component('direct-messages', {
     },
     adminkey: {
       type: String,
-      required: true  
+      required: true
     },
     inkey: {
       type: String,
@@ -65,9 +65,10 @@ window.app.component('direct-messages', {
         return
       }
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'GET',
-          '/nostrchat/api/v1/message/' + pubkey
+          '/nostrchat/api/v1/message/' + pubkey,
+          this.inkey
         )
         this.messages = data
         this.focusOnChatBox(this.messages.length - 1)
@@ -78,9 +79,10 @@ window.app.component('direct-messages', {
 
     async getPeers() {
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'GET',
-          '/nostrchat/api/v1/peer'
+          '/nostrchat/api/v1/peer',
+          this.inkey
         )
         this.peers = data
         this.unreadMessages = data.filter(c => c.unread_messages).length
@@ -91,7 +93,7 @@ window.app.component('direct-messages', {
 
     async sendDirectMessage() {
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'POST',
           '/nostrchat/api/v1/message',
           {
@@ -109,7 +111,7 @@ window.app.component('direct-messages', {
 
     async addPublicKey() {
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'POST',
           '/nostrchat/api/v1/peer',
           {
@@ -149,7 +151,7 @@ window.app.component('direct-messages', {
     },
 
     showOrderDetails: function (orderId, eventId) {
-      this.$emit('order-selected', {orderId, eventId})
+      this.$emit('order-selected', { orderId, eventId })
     },
 
     showClientOrders: function () {
