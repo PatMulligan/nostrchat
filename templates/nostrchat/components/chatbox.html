@@ -1,0 +1,80 @@
+<q-card class="chatbox">
+  <q-card-section class="q-pa-none">
+    <!-- Header -->
+    <q-toolbar class="bg-primary text-white">
+      <q-toolbar-title>
+        <span v-if="activePublicKey" v-text="activePeerName"></span>
+        <span v-else>Select a peer to start chatting</span>
+      </q-toolbar-title>
+    </q-toolbar>
+  </q-card-section>
+
+  <!-- Messages Area -->
+  <q-card-section class="chat-container q-pa-md">
+    <div class="chat-box" ref="chatBox">
+      <div v-if="!activePublicKey" class="text-center q-pa-lg text-grey">
+        <div class="text-h6 q-mt-md">No Active Chat</div>
+        <div class="text-caption">Select a peer from the list to start chatting</div>
+      </div>
+
+      <div v-else-if="!messages.length" class="text-center q-pa-lg text-grey">
+        <div class="text-h6 q-mt-md">No Messages Yet</div>
+        <div class="text-caption">Start the conversation by sending a message</div>
+      </div>
+
+      <template v-else>
+        <div v-for="(dm, index) in messagesAsJson" :key="index">
+          <q-chat-message
+            :class="`chat-message-index-${index}`"
+            :text="[dm.message]"
+            :sent="dm.event_pubkey !== activePublicKey"
+            :name="dm.profile?.name || 'unknown'"
+            :stamp="dm.dateFrom"
+            size="8"
+            text-color="white"
+            :bg-color="dm.event_pubkey !== activePublicKey ? 'primary' : 'grey-7'"
+          >
+            <template v-slot:avatar>
+              <q-avatar>
+                <q-icon name="account_circle" />
+              </q-avatar>
+            </template>
+          </q-chat-message>
+        </div>
+      </template>
+    </div>
+  </q-card-section>
+
+  <!-- Input Area -->
+  <q-card-section class="q-pa-md">
+    <q-form @submit="sendDirectMessage" class="chat-input">
+      <div class="row q-col-gutter-sm">
+        <div class="col">
+          <q-input
+            ref="messageInput"
+            v-model="newMessage"
+            :disable="!activePublicKey"
+            dense
+            outlined
+            placeholder="Type a message..."
+            :hint="!activePublicKey ? 'Select a peer to start chatting' : null"
+            @keyup.enter.prevent="sendDirectMessage"
+          >
+            <template v-slot:append>
+              <q-btn
+                :disable="!newMessage || !activePublicKey"
+                round
+                dense
+                flat
+                icon="send"
+                type="submit"
+              >
+                <q-tooltip>Send Message</q-tooltip>
+              </q-btn>
+            </template>
+          </q-input>
+        </div>
+      </div>
+    </q-form>
+  </q-card-section>
+</q-card>

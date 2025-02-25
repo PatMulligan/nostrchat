@@ -1,6 +1,6 @@
-window.app.component('direct-messages', {
-  name: 'DirectMessages',
-  template: '#direct-messages',
+window.app.component('chatbox', {
+  name: 'Chatbox',
+  template: '#chatbox',
 
   props: {
     nostracctId: {
@@ -18,13 +18,18 @@ window.app.component('direct-messages', {
     activePublicKey: {
       type: String,
       default: null
+    },
+    peers: {
+      type: Array,
+      default: () => []
     }
   },
 
   data() {
     return {
       messages: [],
-      newMessage: ''
+      newMessage: '',
+      loading: false
     }
   },
 
@@ -49,6 +54,11 @@ window.app.component('direct-messages', {
           }
         }
       })
+    },
+
+    activePeerName() {
+      const peer = this.peers.find(p => p.public_key === this.activePublicKey)
+      return peer?.profile?.name || 'Unknown Peer'
     }
   },
 
@@ -58,6 +68,8 @@ window.app.component('direct-messages', {
         this.messages = []
         return
       }
+
+      this.loading = true
       try {
         const { data } = await LNbits.api.request(
           'GET',
@@ -65,13 +77,19 @@ window.app.component('direct-messages', {
           this.inkey
         )
         this.messages = data
-        this.focusOnChatBox(this.messages.length - 1)
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
       } catch (error) {
         LNbits.utils.notifyApiError(error)
+      } finally {
+        this.loading = false
       }
     },
 
     async sendDirectMessage() {
+      if (!this.newMessage.trim()) return
+
       try {
         const { data } = await LNbits.api.request(
           'POST',
@@ -84,7 +102,10 @@ window.app.component('direct-messages', {
         )
         this.messages.push(data)
         this.newMessage = ''
-        this.focusOnChatBox(this.messages.length - 1)
+        this.$nextTick(() => {
+          this.scrollToBottom()
+          this.$refs.messageInput.focus()
+        })
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
@@ -93,20 +114,18 @@ window.app.component('direct-messages', {
     handleNewMessage(data) {
       if (data.peerPubkey === this.activePublicKey) {
         this.messages.push(data.dm)
-        this.focusOnChatBox(this.messages.length - 1)
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
       }
       this.$emit('refresh-peers')
     },
 
-    focusOnChatBox(index) {
-      setTimeout(() => {
-        const lastChatBox = document.getElementsByClassName(
-          `chat-mesage-index-${index}`
-        )
-        if (lastChatBox && lastChatBox[0]) {
-          lastChatBox[0].scrollIntoView()
-        }
-      }, 100)
+    scrollToBottom() {
+      const chatBox = this.$refs.chatBox
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight
+      }
     }
   },
 
