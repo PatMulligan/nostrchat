@@ -2,7 +2,7 @@
 window.app = Vue.createApp({
   el: '#vue',
   mixins: [windowMixin],
-  
+
   // Declare models/variables
   data() {
     return {
@@ -99,7 +99,7 @@ window.app = Vue.createApp({
 
     async getNostrAcct() {
       try {
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'GET',
           '/nostrchat/api/v1/nostracct',
           this.g.user.wallets[0].inkey
@@ -118,7 +118,7 @@ window.app = Vue.createApp({
           public_key: pubkey,
           config: {}
         }
-        const {data} = await LNbits.api.request(
+        const { data } = await LNbits.api.request(
           'POST',
           '/nostrchat/api/v1/nostracct',
           this.g.user.wallets[0].adminkey,
@@ -139,14 +139,14 @@ window.app = Vue.createApp({
 
     async waitForNotifications() {
       if (!this.nostracct) return
-      
+
       try {
         const scheme = location.protocol === 'http:' ? 'ws' : 'wss'
         const port = location.port ? `:${location.port}` : ''
         const wsUrl = `${scheme}://${document.domain}${port}/api/v1/ws/${this.nostracct.id}`
-        
+
         this.wsConnection = new WebSocket(wsUrl)
-        this.wsConnection.addEventListener('message', async ({data}) => {
+        this.wsConnection.addEventListener('message', async ({ data }) => {
           const parsedData = JSON.parse(data)
           if (parsedData.type === 'dm:-1') {
             await this.$refs.directMessagesRef.handleNewMessage(parsedData)
