@@ -3,7 +3,6 @@ import {API} from './api.js'
 const nostr = window.NostrTools
 
 export const app = Vue.createApp({
-  el: '#vue',
   mixins: [window.windowMixin],
   data() {
     return {
