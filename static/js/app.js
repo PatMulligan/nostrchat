@@ -1,8 +1,9 @@
-import {API} from './api.js'
+import { API } from './api.js'
 
 const nostr = window.NostrTools
 
 export const app = Vue.createApp({
+  el: "#vue",
   mixins: [window.windowMixin],
   data() {
     return {
@@ -123,7 +124,7 @@ export const app = Vue.createApp({
         const scheme = location.protocol === 'http:' ? 'ws' : 'wss'
         const port = location.port ? `:${location.port}` : ''
         const wsUrl = `${scheme}://${document.domain}${port}/api/v1/ws/${this.nostracct.id}`
-        
+
         this.wsConnection = new WebSocket(wsUrl)
         this.wsConnection.onmessage = async e => {
           const data = JSON.parse(e.data)
