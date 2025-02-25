@@ -1,5 +1,3 @@
-import {API} from '../js/api.js'
-
 window.app.component('direct-messages', {
   name: 'DirectMessages',
   
@@ -67,7 +65,11 @@ window.app.component('direct-messages', {
         return
       }
       try {
-        this.messages = await API.getDirectMessages(pubkey)
+        const {data} = await LNbits.api.request(
+          'GET',
+          '/nostrchat/api/v1/message/' + pubkey
+        )
+        this.messages = data
         this.focusOnChatBox(this.messages.length - 1)
       } catch (error) {
         LNbits.utils.notifyApiError(error)
@@ -76,9 +78,12 @@ window.app.component('direct-messages', {
 
     async getPeers() {
       try {
-        const peers = await API.getPeers()
-        this.peers = peers
-        this.unreadMessages = peers.filter(c => c.unread_messages).length
+        const {data} = await LNbits.api.request(
+          'GET',
+          '/nostrchat/api/v1/peer'
+        )
+        this.peers = data
+        this.unreadMessages = data.filter(c => c.unread_messages).length
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
@@ -86,11 +91,15 @@ window.app.component('direct-messages', {
 
     async sendDirectMessage() {
       try {
-        const message = await API.sendDirectMessage({
-          message: this.newMessage,
-          public_key: this.activePublicKey
-        })
-        this.messages.push(message)
+        const {data} = await LNbits.api.request(
+          'POST',
+          '/nostrchat/api/v1/message',
+          {
+            message: this.newMessage,
+            public_key: this.activePublicKey
+          }
+        )
+        this.messages.push(data)
         this.newMessage = ''
         this.focusOnChatBox(this.messages.length - 1)
       } catch (error) {
@@ -100,13 +109,17 @@ window.app.component('direct-messages', {
 
     async addPublicKey() {
       try {
-        const peer = await API.addPeer({
-          public_key: this.newPublicKey,
-          nostracct_id: this.nostracctId,
-          unread_messages: 0
-        })
+        const {data} = await LNbits.api.request(
+          'POST',
+          '/nostrchat/api/v1/peer',
+          {
+            public_key: this.newPublicKey,
+            nostracct_id: this.nostracctId,
+            unread_messages: 0
+          }
+        )
         this.newPublicKey = null
-        this.activePublicKey = peer.public_key
+        this.activePublicKey = data.public_key
         await this.selectActivePeer()
       } catch (error) {
         LNbits.utils.notifyApiError(error)

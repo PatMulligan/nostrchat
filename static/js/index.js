@@ -1,6 +1,9 @@
 // Create Vue component for the extension
 window.app = Vue.createApp({
-  mixins: [window.windowMixin],
+  el: '#vue',
+  mixins: [windowMixin],
+  
+  // Declare models/variables
   data() {
     return {
       nostracct: null,
@@ -15,35 +18,37 @@ window.app = Vue.createApp({
       wsConnection: null
     }
   },
+
+  // Where functions live
   methods: {
     generateKeys: async function () {
       const privateKey = window.NostrTools.generatePrivateKey()
       await this.createNostrAcct(privateKey)
     },
+
     importKeys: async function () {
       this.importKeyDialog.show = false
       let privateKey = this.importKeyDialog.data.privateKey
-      if (!privateKey) {
-        return
-      }
+      if (!privateKey) return
+
       try {
         if (privateKey.toLowerCase().startsWith('nsec')) {
           privateKey = window.NostrTools.nip19.decode(privateKey).data
         }
       } catch (error) {
-        this.$q.notify({
-          type: 'negative',
-          message: `${error}`
-        })
+        LNbits.utils.notifyApiError(error)
       }
       await this.createNostrAcct(privateKey)
     },
-    showImportKeysDialog: async function () {
+
+    showImportKeysDialog() {
       this.importKeyDialog.show = true
     },
-    toggleShowKeys: function () {
+
+    toggleShowKeys() {
       this.showKeys = !this.showKeys
     },
+
     toggleNostrAcctState: async function () {
       const nostracct = await this.getNostrAcct()
       if (!nostracct) {
@@ -65,6 +70,7 @@ window.app = Vue.createApp({
         await this.toggleNostrAcct()
       })
     },
+
     toggleNostrAcct: async function () {
       try {
         const { data } = await LNbits.api.request(
@@ -84,22 +90,26 @@ window.app = Vue.createApp({
         LNbits.utils.notifyApiError(error)
       }
     },
+
     handleNostrAcctDeleted: function () {
       this.nostracct = null
       this.activeChatPeer = ''
       this.showKeys = false
     },
+
     async getNostrAcct() {
       try {
         const {data} = await LNbits.api.request(
           'GET',
-          '/nostrchat/api/v1/nostracct'
+          '/nostrchat/api/v1/nostracct',
+          this.g.user.wallets[0].inkey
         )
         this.nostracct = data
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
     },
+
     async createNostrAcct(privateKey) {
       try {
         const pubkey = window.NostrTools.getPublicKey(privateKey)
@@ -111,41 +121,37 @@ window.app = Vue.createApp({
         const {data} = await LNbits.api.request(
           'POST',
           '/nostrchat/api/v1/nostracct',
+          this.g.user.wallets[0].adminkey,
           payload
         )
         this.nostracct = data
-        this.$q.notify({
-          type: 'positive',
-          message: 'Nostr Account Created!'
-        })
+        LNbits.utils.notifySuccess('Nostr Account Created!')
         this.waitForNotifications()
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
     },
+
     async waitForNotifications() {
       if (!this.nostracct) return
+      
       try {
         const scheme = location.protocol === 'http:' ? 'ws' : 'wss'
         const port = location.port ? `:${location.port}` : ''
         const wsUrl = `${scheme}://${document.domain}${port}/api/v1/ws/${this.nostracct.id}`
         
         this.wsConnection = new WebSocket(wsUrl)
-        this.wsConnection.onmessage = async e => {
-          const data = JSON.parse(e.data)
-          if (data.type === 'dm:-1') {
-            await this.$refs.directMessagesRef.handleNewMessage(data)
+        this.wsConnection.addEventListener('message', async ({data}) => {
+          const parsedData = JSON.parse(data)
+          if (parsedData.type === 'dm:-1') {
+            await this.$refs.directMessagesRef.handleNewMessage(parsedData)
           }
-        }
-      } catch (error) {
-        this.$q.notify({
-          timeout: 5000,
-          type: 'warning',
-          message: 'Failed to watch for updates',
-          caption: `${error}`
         })
+      } catch (error) {
+        LNbits.utils.notifyError('Failed to watch for updates')
       }
     },
+
     async restartNostrConnection() {
       try {
         await LNbits.utils.confirmDialog(
@@ -153,13 +159,16 @@ window.app = Vue.createApp({
         )
         await LNbits.api.request(
           'PUT',
-          '/nostrchat/api/v1/restart'
+          '/nostrchat/api/v1/restart',
+          this.g.user.wallets[0].adminkey
         )
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
     }
   },
+
+  // To run on startup
   created() {
     this.getNostrAcct()
     setInterval(() => {
@@ -170,4 +179,7 @@ window.app = Vue.createApp({
   }
 })
 
-window.app.mount('#vue')
+// Mount after components are registered
+setTimeout(() => {
+  window.app.mount()
+}, 0)

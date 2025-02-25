@@ -1,7 +1,24 @@
 window.app.component('nostracct-details', {
   name: 'nostracct-details',
   template: '#nostracct-details',
-  props: ['nostracct-id', 'adminkey', 'inkey', 'showKeys'],
+  props: {
+    nostracctId: {
+      type: String,
+      required: true
+    },
+    inkey: {
+      type: String,
+      required: true
+    },
+    adminkey: {
+      type: String,
+      required: true
+    },
+    showKeys: {
+      type: Boolean,
+      default: false
+    }
+  },
   delimiters: ['${', '}'],
   data: function () {
     return {}
@@ -45,32 +62,18 @@ window.app.component('nostracct-details', {
         LNbits.utils.notifyApiError(error)
       }
     },
-    deleteNostrAcctTables: function () {
-      LNbits.utils
-        .confirmDialog(
-          `
-             Stalls, products and orders will be deleted also!
-             Are you sure you want to delete this nostracct?
-            `
+    async deleteNostrAcct() {
+      try {
+        await LNbits.utils.confirmDialog('Are you sure you want to delete this Nostr Account?')
+        await LNbits.api.request(
+          'DELETE',
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}`,
+          this.adminkey
         )
-        .onOk(async () => {
-          try {
-            await LNbits.api.request(
-              'DELETE',
-              '/nostrchat/api/v1/nostracct/' + this.nostracctId,
-              this.adminkey
-            )
-            this.$emit('nostracct-deleted', this.nostracctId)
-            this.$q.notify({
-              type: 'positive',
-              message: 'Nostr Account Deleted',
-              timeout: 5000
-            })
-          } catch (error) {
-            console.warn(error)
-            LNbits.utils.notifyApiError(error)
-          }
-        })
+        this.$emit('nostracct-deleted')
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      }
     },
     deleteNostrAcctFromNostr: function () {
       LNbits.utils

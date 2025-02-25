@@ -5,10 +5,10 @@ const lnbitsExtensionPractices = [
     "Follow the LNBits extension structure and naming conventions",
     "Use Options API pattern consistently within components",
     "Implement proper props validation in components",
-    "Use the LNBits API service pattern for backend communication",
+    "Make API calls directly using LNbits.api.request instead of separate API service",
     "Separate views from reusable components",
     "Follow LNbits extension routing patterns",
-    "Use proper error handling with q-notify",
+    "Use LNbits.utils helpers for notifications and dialogs",
     "Implement loading states for all async operations",
     "Never use Jinja2 template expressions ({{ }}) in Vue component templates",
     "Use v-text, v-bind, or v-html directives instead of interpolation in component templates",
@@ -21,7 +21,7 @@ const quasarBestPractices = [
     "Use Quasar components instead of plain HTML where possible",
     "Utilize Quasar's q-card, q-table, and other UI components to match LNBits core UI",
     "Use Quasar directives like v-ripple, v-close-popup where appropriate",
-    "Use Quasar's Dialog, Notify, and Loading utilities for user feedback",
+    "Use LNbits.utils helpers for notifications and dialogs",
     "Implement Quasar's form components with proper validation",
     "Leverage Quasar's Dark Mode API to respect LNBits theme settings",
     "Use Quasar's CSS utility classes for consistent styling",
@@ -33,22 +33,24 @@ const folderStructure = `
 your_extension_name/
   __init__.py           # Python extension initialization
   migrations.py         # Database migrations
-  models.py             # Data models
-  crud.py               # Database operations
-  api_ext.py             # API routes (blueprints)
-  config.json           # Extension configuration
+  models.py            # Data models
+  crud.py             # Database operations
+  api_ext.py          # API routes (blueprints)
+  config.json         # Extension configuration
   static/
     js/
-      api.js            # JavaScript API client
-      index.js          # Main entry point
-      components/       # Vue components
-      views/            # Page views
+      index.js        # Main entry point
+      components/     # Vue components
+      views/          # Page views
     css/
-      style.css         # Extension-specific styles
-    images/             # Extension-specific images
+      style.css       # Extension-specific styles
+    images/           # Extension-specific images
   templates/
     your_extension_name/
-      index.html        # Main template
+      components/     # Component templates
+        component-one.html
+        component-two.html
+      index.html      # Main template
 `;
 
 // Quasar-specific components to use in LNBits extensions
@@ -67,172 +69,58 @@ const quasarComponents = [
 ];
 
 // LNBits Extension API patterns
-const apiPatterns = `
-// Example api.js pattern for LNBits extension
-export const API = {
-  // Get extension data
-  async getData() {
-    const { data } = await LNbits.api.request(
-      'GET',
-      '/api/v1/extension/your_extension_name/data'
-    )
-    return data
-  },
+const apiPatterns = [
+    "Always include wallet key (inkey/adminkey) as third parameter",
+    "Use try/catch with LNbits.utils.notifyApiError",
+    "Destructure response to get data: const {data} = await...",
+    "Group related API calls into logical methods",
+    "Make API calls directly using LNbits.api.request instead of separate API service"
+];
 
-  // Create new record
-  async createRecord(payload) {
-    const { data } = await LNbits.api.request(
-      'POST',
-      '/api/v1/extension/your_extension_name/record',
-      payload
-    )
-    return data
-  },
-
-  // Update existing record
-  async updateRecord(recordId, payload) {
-    const { data } = await LNbits.api.request(
-      'PUT',
-      '/api/v1/extension/your_extension_name/record/' + recordId,
-      payload
-    )
-    return data
-  },
-
-  // Delete record
-  async deleteRecord(recordId) {
-    const { data } = await LNbits.api.request(
-      'DELETE',
-      '/api/v1/extension/your_extension_name/record/' + recordId
-    )
-    return data
-  }
-}
-`;
-
-// LNBits Extension component pattern with Quasar
-const componentPattern = `
-// Example component pattern for LNBits extension using Quasar components
-export const YourExtensionComponent = {
-  name: 'YourExtensionComponent',
-  
-  props: {
-    wallet: {
-      type: Object,
-      required: true
-    }
-  },
-  
-  data() {
-    return {
-      loading: false,
-      records: [],
-      form: {
-        name: '',
-        description: '',
-        amount: 0
-      },
-      formRules: {
-        name: [val => !!val || 'Name is required'],
-        amount: [
-          val => val > 0 || 'Amount must be greater than 0',
-          val => !isNaN(val) || 'Amount must be a number'
-        ]
-      },
-      columns: [
-        {name: 'name', align: 'left', label: 'Name', field: 'name'},
-        {name: 'description', align: 'left', label: 'Description', field: 'description'},
-        {name: 'amount', align: 'right', label: 'Amount', field: 'amount'},
-        {name: 'actions', align: 'right', label: 'Actions'}
-      ],
-      pagination: {
-        rowsPerPage: 10
+// LNBits component pattern
+const componentPattern = {
+  // Base component pattern
+  basic: `
+    window.app.component('component-name', {
+      name: 'ComponentName',
+      template: '#component-template',
+      props: {
+        // Props validation
       }
-    }
-  },
+    })
+  `,
   
-  computed: {
-    canSubmit() {
-      return !!this.form.name && this.form.amount > 0
-    }
-  },
-  
-  methods: {
-    async fetchRecords() {
-      this.loading = true
-      try {
-        this.records = await API.getData()
-      } catch (error) {
-        this.$q.notify({
-          type: 'negative',
-          message: \`Error: \${error.message || error}\`,
-          timeout: 5000
-        })
-      } finally {
-        this.loading = false
-      }
-    },
-    
-    async submitForm() {
-      this.loading = true
-      try {
-        const newRecord = await API.createRecord(this.form)
-        this.records.push(newRecord)
-        this.form = {
-          name: '',
-          description: '',
-          amount: 0
+  // Quasar component pattern
+  quasar: `
+    window.app.component('quasar-component', {
+      name: 'QuasarComponent',
+      template: '#quasar-template',
+      props: {
+        // Props validation
+      },
+      data() {
+        return {
+          loading: false,
+          // Quasar specific data properties
         }
-        this.$q.notify({
-          type: 'positive',
-          message: 'Record created successfully!',
-          timeout: 5000
-        })
-      } catch (error) {
-        this.$q.notify({
-          type: 'negative',
-          message: \`Error: \${error.message || error}\`,
-          timeout: 5000
-        })
-      } finally {
-        this.loading = false
-      }
-    },
-    
-    openDeleteDialog(record) {
-      this.$q.dialog({
-        title: 'Confirm',
-        message: \`Are you sure you want to delete "\${record.name}"?\`,
-        cancel: true,
-        persistent: true
-      }).onOk(async () => {
-        try {
-          await API.deleteRecord(record.id)
-          const index = this.records.findIndex(r => r.id === record.id)
-          if (index > -1) {
-            this.records.splice(index, 1)
+      },
+      methods: {
+        async apiCall() {
+          try {
+            const {data} = await LNbits.api.request(
+              'METHOD',
+              '/endpoint',
+              this.g.user.wallets[0].adminkey
+            )
+            LNbits.utils.notifySuccess('Success')
+          } catch (error) {
+            LNbits.utils.notifyApiError(error)
           }
-          this.$q.notify({
-            type: 'positive',
-            message: 'Record deleted successfully!',
-            timeout: 5000
-          })
-        } catch (error) {
-          this.$q.notify({
-            type: 'negative',
-            message: \`Error: \${error.message || error}\`,
-            timeout: 5000
-          })
         }
-      })
-    }
-  },
-  
-  created() {
-    this.fetchRecords()
-  }
-}
-`;
+      }
+    })
+  `
+};
 
 // LNBits Extension index.js entry point pattern with Quasar
 const indexJsPattern = `
@@ -623,3 +511,202 @@ const parentThemeConsiderations = [
     "Follow parent spacing patterns (q-pa-*, q-ma-*)",
     "Use parent transition timings for animations"
 ];
+
+// LNbits Extension Vue app initialization pattern
+const appPattern = `
+// Create Vue component for the extension
+window.app = Vue.createApp({
+  el: '#vue',
+  mixins: [windowMixin],
+  
+  // Declare models/variables
+  data() {
+    return {
+      // State variables here
+    }
+  },
+
+  // Where functions live
+  methods: {
+    // Example API request pattern
+    async exampleRequest() {
+      try {
+        const {data} = await LNbits.api.request(
+          'GET',
+          '/your_extension/api/v1/endpoint',
+          this.g.user.wallets[0].inkey // or adminkey based on needs
+        )
+        // Handle response
+        LNbits.utils.notifySuccess('Success message')
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      }
+    }
+  },
+
+  // To run on startup
+  created() {
+    // Initialization here
+  }
+})
+`;
+
+// LNbits notification patterns
+const notificationPatterns = [
+  "Use LNbits.utils.notifySuccess() for success messages",
+  "Use LNbits.utils.notifyApiError() for API errors",
+  "Use LNbits.utils.notifyError() for general errors",
+  "Use LNbits.utils.confirmDialog() for confirmations"
+];
+
+// LNbits API request patterns
+const apiRequestPatterns = [
+  "Always include wallet key (inkey/adminkey) as third parameter",
+  "Use try/catch with LNbits.utils.notifyApiError",
+  "Destructure response to get data: const {data} = await...",
+  "Group related API calls into logical methods"
+];
+
+// LNbits component registration pattern
+const componentPattern = `
+window.app.component('component-name', {
+  name: 'ComponentName',
+  template: '#component-template',
+  
+  props: {
+    propName: {
+      type: Type,
+      required: true/false,
+      default: defaultValue
+    }
+  },
+
+  data() {
+    return {
+      // Component state
+    }
+  },
+
+  methods: {
+    async apiCall() {
+      try {
+        const {data} = await LNbits.api.request(
+          'METHOD',
+          '/endpoint',
+          this.adminkey
+        )
+        LNbits.utils.notifySuccess('Success')
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      }
+    }
+  }
+})
+`;
+
+// Script and template loading pattern
+const templatePattern = {
+  // Loading order
+  scriptOrder: `
+    <!-- Regular scripts -->
+    <script src="{{ url_for('extension_static', path='js/dependency.js') }}"></script>
+
+    <!-- Component templates -->
+    <template id="component-one">{% include("your_extension/components/component-one.html") %}</template>
+    <template id="component-two">{% include("your_extension/components/component-two.html") %}</template>
+
+    <!-- Initialize Vue app first -->
+    <script src="{{ static_url_for('extension/static', 'js/index.js') }}"></script>
+
+    <!-- Components -->
+    <script src="{{ static_url_for('extension/static', 'components/component-one.js') }}"></script>
+    <script src="{{ static_url_for('extension/static', 'components/component-two.js') }}"></script>
+  `,
+
+  // Organization rules
+  rules: [
+    "Keep component templates in separate HTML files under components/",
+    "Include component templates in index.html before scripts",
+    "Use template IDs that match component names (kebab-case)",
+    "Reference templates in components using template: '#template-id'",
+    "Keep Jinja2 includes organized under the extension's template folder",
+    "Follow consistent naming between template files and component registrations",
+    "Never use Jinja2 template expressions ({{ }}) in Vue component templates",
+    "Use v-text, v-bind, or v-html directives instead of interpolation in component templates"
+  ]
+};
+
+// Best practices for LNbits extensions
+const bestPractices = [
+  // App initialization
+  "Initialize app with window.app = Vue.createApp()",
+  "Use windowMixin for access to global state",
+  
+  // Component practices
+  "Register components after app creation, before mount",
+  "Keep components simple and focused",
+  "Use proper prop validation in components",
+  
+  // API and notifications
+  "Use LNbits.utils helpers for notifications and dialogs",
+  "Use proper wallet keys (inkey/adminkey) in API requests",
+  "Use WebSocket addEventListener instead of onmessage",
+  
+  // Organization
+  "Follow consistent method organization with comments",
+  "Group related API calls into logical methods",
+  
+  // Quasar specific
+  "Use Quasar components instead of plain HTML where possible",
+  "Follow existing LNBits component patterns when implementing new Quasar components"
+];
+
+// LNbits component template pattern
+const componentTemplatePattern = `
+<!-- In index.html -->
+<template id="your-component">
+  {% include("your_extension/components/your-component.html") %}
+</template>
+
+<!-- In components/your-component.html -->
+<div>
+  <q-card>
+    <!-- Component content here -->
+    <span v-text="someData"></span>
+  </q-card>
+</div>
+
+<!-- In components/your-component.js -->
+window.app.component('your-component', {
+  name: 'YourComponent',
+  template: '#your-component',
+  props: {
+    // Props here
+  }
+})
+`;
+
+// Template organization rules
+const templateOrganizationRules = [
+  "Keep component templates in separate HTML files under components/",
+  "Include component templates in index.html before scripts",
+  "Use template IDs that match component names (kebab-case)",
+  "Reference templates in components using template: '#template-id'",
+  "Keep Jinja2 includes organized under the extension's template folder",
+  "Follow consistent naming between template files and component registrations"
+];
+
+// Component file structure
+const componentFileStructure = `
+your_extension_name/
+  templates/
+    your_extension_name/
+      components/
+        component-one.html      # Component template
+        component-two.html      # Component template
+      index.html               # Main template with includes
+  static/
+    components/
+      component-one.js         # Component registration
+      component-two.js         # Component registration
+`;

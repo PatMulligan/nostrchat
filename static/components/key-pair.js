@@ -2,7 +2,16 @@ window.app.component('key-pair', {
   name: 'key-pair',
   template: '#key-pair',
   delimiters: ['${', '}'],
-  props: ['public-key', 'private-key'],
+  props: {
+    privateKey: {
+      type: String,
+      required: true
+    },
+    publicKey: {
+      type: String,
+      required: true
+    }
+  },
   data: function () {
     return {
       showPrivateKey: false

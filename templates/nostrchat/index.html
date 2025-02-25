@@ -203,10 +203,12 @@
 <script src="{{ url_for('nostrchat_static', path='js/nostr.bundle.js') }}"></script>
 <script src="{{ url_for('nostrchat_static', path='js/utils.js') }}"></script>
 
+<!-- Initialize Vue app first -->
+<script src="{{ static_url_for('nostrchat/static', 'js/index.js') }}"></script>
+
 <!-- Components -->
 <script src="{{ static_url_for('nostrchat/static', 'components/direct-messages.js') }}"></script>
 <script src="{{ static_url_for('nostrchat/static', 'components/key-pair.js') }}"></script>
 <script src="{{ static_url_for('nostrchat/static', 'components/nostracct-details.js') }}"></script>
-<script src="{{ static_url_for('nostrchat/static', 'js/index.js') }}"></script>
 
 {% endblock %}
