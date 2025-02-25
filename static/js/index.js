@@ -19,7 +19,8 @@ window.app = Vue.createApp({
       activePublicKey: null,
       showAddPeer: false,
       newPeerKey: null,
-      isMobileView: false
+      isMobileView: false,
+      windowHeight: window.innerHeight - 120
     }
   },
 
@@ -235,17 +236,27 @@ window.app = Vue.createApp({
 
     refreshPeers() {
       this.getPeers()
+    },
+
+    handleResize() {
+      // Update window height when the viewport changes (e.g., keyboard appears)
+      this.windowHeight = window.innerHeight - 120
     }
   },
 
   // To run on startup
   created() {
     this.getNostrAcct()
+    window.addEventListener('resize', this.handleResize)
     setInterval(() => {
       if (!this.wsConnection || this.wsConnection.readyState !== WebSocket.OPEN) {
         this.waitForNotifications()
       }
     }, 1000)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('resize', this.handleResize)
   },
 
   watch: {

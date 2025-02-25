@@ -17,9 +17,9 @@
     </q-toolbar>
   </q-card-section>
 
-  <!-- Messages Area -->
-  <q-card-section class="chat-container q-pa-md">
-    <div class="chat-box" ref="chatBox">
+  <!-- Messages Area - Fixed height with scroll -->
+  <q-card-section class="chat-messages-container">
+    <div class="chat-messages-scroll" ref="chatBox">
       <div v-if="!activePublicKey" class="text-center q-pa-lg text-grey">
         <div class="text-h6 q-mt-md">No Active Chat</div>
         <div class="text-caption">Select a peer from the list to start chatting</div>
