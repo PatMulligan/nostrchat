@@ -1,95 +1,5 @@
 {% extends "base.html" %} {% from "macros.jinja" import window_vars with context
-%} 
-{% block scripts %} {{ window_vars(user) }}
-
-<style scoped>
-  .full-height {
-    height: 65vh;
-  }
-
-  .chat-container {
-    position: relative;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    height: 100%;
-  }
-
-  .chat-box {
-    padding: 1rem;
-    overflow-y: auto;
-    width: 100%;
-    scroll-behavior: smooth;
-  }
-
-  .chatbox {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .peers-list {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .peers-scroll {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .chat-input {
-    border-top: 1px solid var(--q-separator-color);
-  }
-
-  .peer-item {
-    min-width: 0; /* Enable text truncation in flex items */
-  }
-
-  .peer-key {
-    max-width: 100%;
-    display: block;
-  }
-
-  .peer-key .ellipsis {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-</style>
-
-<template id="key-pair"
-  >{% include("nostrchat/components/key-pair.html") %}</template
->
-<template id="chatbox"
-  >{% include("nostrchat/components/chatbox.html") %}</template
->
-
-<template id="nostracct-details"
-  >{% include("nostrchat/components/nostracct-details.html") %}</template
->
-
-<template id="peers-list">
-  {% include "nostrchat/components/peers-list.html" %}
-</template>
-
-<!-- Regular scripts -->
-<script src="{{ url_for('nostrchat_static', path='js/nostr.bundle.js') }}"></script>
-<script src="{{ url_for('nostrchat_static', path='js/utils.js') }}"></script>
-
-<!-- Initialize Vue app first -->
-<script src="{{ static_url_for('nostrchat/static', 'js/index.js') }}"></script>
-
-<!-- Components -->
-<script src="{{ static_url_for('nostrchat/static', 'components/chatbox.js') }}"></script>
-<script src="{{ static_url_for('nostrchat/static', 'components/key-pair.js') }}"></script>
-<script src="{{ static_url_for('nostrchat/static', 'components/nostracct-details.js') }}"></script>
-<script src="{{ static_url_for('nostrchat/static', 'components/peers-list.js') }}"></script>
-
-{% endblock %}
-
-{% block page %}
+%} {% block page %}
 <div class="row q-col-gutter-md">
   <div class="col-12 col-md-7 q-gutter-y-md">
 
@@ -323,4 +233,81 @@
     </q-card>
   </q-dialog>
 </div>
+{% endblock %}{% block scripts %} {{ window_vars(user) }}
+
+<style scoped>
+  .chat-container {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    height: 100%;
+  }
+
+  .chatbox {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .peers-list {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .peers-scroll {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .chat-input {
+    border-top: 1px solid var(--q-separator-color);
+  }
+
+  .peer-item {
+    min-width: 0; /* Enable text truncation in flex items */
+  }
+
+  .peer-key {
+    max-width: 100%;
+    display: block;
+  }
+
+  .peer-key .ellipsis {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
+<template id="key-pair"
+  >{% include("nostrchat/components/key-pair.html") %}</template
+>
+<template id="chatbox"
+  >{% include("nostrchat/components/chatbox.html") %}</template
+>
+
+<template id="nostracct-details"
+  >{% include("nostrchat/components/nostracct-details.html") %}</template
+>
+
+<template id="peers-list">
+  {% include "nostrchat/components/peers-list.html" %}
+</template>
+
+<!-- Regular scripts -->
+<script src="{{ url_for('nostrchat_static', path='js/nostr.bundle.js') }}"></script>
+<script src="{{ url_for('nostrchat_static', path='js/utils.js') }}"></script>
+
+<!-- Initialize Vue app first -->
+<script src="{{ static_url_for('nostrchat/static', 'js/index.js') }}"></script>
+
+<!-- Components -->
+<script src="{{ static_url_for('nostrchat/static', 'components/chatbox.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/key-pair.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/nostracct-details.js') }}"></script>
+<script src="{{ static_url_for('nostrchat/static', 'components/peers-list.js') }}"></script>
+
 {% endblock %}
+
