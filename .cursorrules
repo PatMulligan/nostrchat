@@ -1,0 +1,625 @@
+// LNBits Extension with Quasar v2.17.0 .cursorrules
+
+// LNBits Extension Vue 3 Options API best practices
+const lnbitsExtensionPractices = [
+    "Follow the LNBits extension structure and naming conventions",
+    "Use Options API pattern consistently within components",
+    "Implement proper props validation in components",
+    "Use the LNBits API service pattern for backend communication",
+    "Separate views from reusable components",
+    "Follow LNbits extension routing patterns",
+    "Use proper error handling with q-notify",
+    "Implement loading states for all async operations",
+    "Never use Jinja2 template expressions ({{ }}) in Vue component templates",
+    "Use v-text, v-bind, or v-html directives instead of interpolation in component templates",
+    "Keep Jinja2 expressions only in the main index.html file",
+    "Use proper escaping when mixing template languages"
+];
+
+// Quasar Framework best practices for LNBits extensions
+const quasarBestPractices = [
+    "Use Quasar components instead of plain HTML where possible",
+    "Utilize Quasar's q-card, q-table, and other UI components to match LNBits core UI",
+    "Use Quasar directives like v-ripple, v-close-popup where appropriate",
+    "Use Quasar's Dialog, Notify, and Loading utilities for user feedback",
+    "Implement Quasar's form components with proper validation",
+    "Leverage Quasar's Dark Mode API to respect LNBits theme settings",
+    "Use Quasar's CSS utility classes for consistent styling",
+    "Follow existing LNBits component patterns when implementing new Quasar components",
+];
+
+// LNBits Extension folder structure
+const folderStructure = `
+your_extension_name/
+  __init__.py           # Python extension initialization
+  migrations.py         # Database migrations
+  models.py             # Data models
+  crud.py               # Database operations
+  api_ext.py             # API routes (blueprints)
+  config.json           # Extension configuration
+  static/
+    js/
+      api.js            # JavaScript API client
+      index.js          # Main entry point
+      components/       # Vue components
+      views/            # Page views
+    css/
+      style.css         # Extension-specific styles
+    images/             # Extension-specific images
+  templates/
+    your_extension_name/
+      index.html        # Main template
+`;
+
+// Quasar-specific components to use in LNBits extensions
+const quasarComponents = [
+    "QBtn for buttons (consistently styled with LNBits core)",
+    "QInput, QSelect, QCheckbox, QRadio for form elements",
+    "QTable for data tables (following LNBits table patterns)",
+    "QCard for content containers (primary UI component in LNBits)",
+    "QList, QItem for lists (consistent with LNBits sidebar)",
+    "QTabs, QTab for tabbed interfaces",
+    "QDialog for modals (use for confirmations and forms)",
+    "QPopupProxy for dropdown and popup content",
+    "QMenu for context menus",
+    "QSpinner and QSkeleton for loading states",
+    "QBanner and QTooltip for user guidance",
+];
+
+// LNBits Extension API patterns
+const apiPatterns = `
+// Example api.js pattern for LNBits extension
+export const API = {
+  // Get extension data
+  async getData() {
+    const { data } = await LNbits.api.request(
+      'GET',
+      '/api/v1/extension/your_extension_name/data'
+    )
+    return data
+  },
+
+  // Create new record
+  async createRecord(payload) {
+    const { data } = await LNbits.api.request(
+      'POST',
+      '/api/v1/extension/your_extension_name/record',
+      payload
+    )
+    return data
+  },
+
+  // Update existing record
+  async updateRecord(recordId, payload) {
+    const { data } = await LNbits.api.request(
+      'PUT',
+      '/api/v1/extension/your_extension_name/record/' + recordId,
+      payload
+    )
+    return data
+  },
+
+  // Delete record
+  async deleteRecord(recordId) {
+    const { data } = await LNbits.api.request(
+      'DELETE',
+      '/api/v1/extension/your_extension_name/record/' + recordId
+    )
+    return data
+  }
+}
+`;
+
+// LNBits Extension component pattern with Quasar
+const componentPattern = `
+// Example component pattern for LNBits extension using Quasar components
+export const YourExtensionComponent = {
+  name: 'YourExtensionComponent',
+  
+  props: {
+    wallet: {
+      type: Object,
+      required: true
+    }
+  },
+  
+  data() {
+    return {
+      loading: false,
+      records: [],
+      form: {
+        name: '',
+        description: '',
+        amount: 0
+      },
+      formRules: {
+        name: [val => !!val || 'Name is required'],
+        amount: [
+          val => val > 0 || 'Amount must be greater than 0',
+          val => !isNaN(val) || 'Amount must be a number'
+        ]
+      },
+      columns: [
+        {name: 'name', align: 'left', label: 'Name', field: 'name'},
+        {name: 'description', align: 'left', label: 'Description', field: 'description'},
+        {name: 'amount', align: 'right', label: 'Amount', field: 'amount'},
+        {name: 'actions', align: 'right', label: 'Actions'}
+      ],
+      pagination: {
+        rowsPerPage: 10
+      }
+    }
+  },
+  
+  computed: {
+    canSubmit() {
+      return !!this.form.name && this.form.amount > 0
+    }
+  },
+  
+  methods: {
+    async fetchRecords() {
+      this.loading = true
+      try {
+        this.records = await API.getData()
+      } catch (error) {
+        this.$q.notify({
+          type: 'negative',
+          message: \`Error: \${error.message || error}\`,
+          timeout: 5000
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    async submitForm() {
+      this.loading = true
+      try {
+        const newRecord = await API.createRecord(this.form)
+        this.records.push(newRecord)
+        this.form = {
+          name: '',
+          description: '',
+          amount: 0
+        }
+        this.$q.notify({
+          type: 'positive',
+          message: 'Record created successfully!',
+          timeout: 5000
+        })
+      } catch (error) {
+        this.$q.notify({
+          type: 'negative',
+          message: \`Error: \${error.message || error}\`,
+          timeout: 5000
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    openDeleteDialog(record) {
+      this.$q.dialog({
+        title: 'Confirm',
+        message: \`Are you sure you want to delete "\${record.name}"?\`,
+        cancel: true,
+        persistent: true
+      }).onOk(async () => {
+        try {
+          await API.deleteRecord(record.id)
+          const index = this.records.findIndex(r => r.id === record.id)
+          if (index > -1) {
+            this.records.splice(index, 1)
+          }
+          this.$q.notify({
+            type: 'positive',
+            message: 'Record deleted successfully!',
+            timeout: 5000
+          })
+        } catch (error) {
+          this.$q.notify({
+            type: 'negative',
+            message: \`Error: \${error.message || error}\`,
+            timeout: 5000
+          })
+        }
+      })
+    }
+  },
+  
+  created() {
+    this.fetchRecords()
+  }
+}
+`;
+
+// LNBits Extension index.js entry point pattern with Quasar
+const indexJsPattern = `
+// Example index.js pattern for LNBits extension with Quasar
+Vue.component('YourExtension', () => {
+  const vue = new Vue({
+    mixins: [windowMixin],
+    
+    data() {
+      return {
+        // State variables here
+        loading: true,
+        records: [],
+        pagination: {
+          sortBy: 'name',
+          descending: false,
+          page: 1,
+          rowsPerPage: 10,
+          rowsNumber: 0
+        }
+      }
+    },
+    
+    computed: {
+      // Computed properties here
+    },
+    
+    methods: {
+      // Methods here utilizing Quasar components and utilities
+      showNotification(message, type = 'positive') {
+        this.$q.notify({
+          type,
+          message,
+          timeout: 5000
+        })
+      },
+      
+      openDialog(record) {
+        this.$q.dialog({
+          component: RecordDialog,
+          parent: this,
+          componentProps: {
+            record,
+            wallet: this.g.wallet
+          }
+        }).onOk(async updatedRecord => {
+          // Handle dialog result
+          await this.refreshData()
+        })
+      }
+    },
+    
+    created() {
+      // Initialization here
+      this.refreshData()
+    },
+    
+    watch: {
+      // Watchers here
+    }
+  })
+  
+  return vue
+})
+`;
+
+// UMD-specific usage in LNBits extension context
+const quasarUMDUsage = `
+<!-- Example index.html template for LNBits extension using Quasar UMD -->
+<!-- Note: LNBits core already includes Vue and Quasar, no need to add them again -->
+
+{% extends "base.html" %}
+
+{% block page %}
+<div class="q-pa-md">
+  <div id="your-extension-app"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Create a Vue instance for the extension
+  new Vue({
+    el: '#your-extension-app',
+    mixins: [windowMixin],
+    data() {
+      return {
+        // Extension state
+      }
+    },
+    methods: {
+      // Extension methods using Quasar utilities
+    },
+    created() {
+      // Initialize extension
+    },
+    template: \`
+      <q-card class="q-pa-md">
+        <q-card-section>
+          <h5 class="q-mt-none q-mb-md">Your Extension</h5>
+          <q-form @submit.prevent="onSubmit">
+            <!-- Quasar form components here -->
+          </q-form>
+        </q-card-section>
+      </q-card>
+    \`
+  })
+</script>
+{% endblock %}
+`;
+
+// Additional LNBits Extension-specific instructions with Quasar
+const additionalInstructions = `
+1. Follow LNBits extension naming convention (snake_case for extension name)
+2. Implement Python backend following FastAPI/Starlette patterns from LNBits
+3. Use Quasar components for UI consistency with the main LNBits application
+4. Use Quasar's built-in icon sets (Material Icons, Font Awesome) matching LNBits core
+5. Implement loading and error states using Quasar's utilities (QSpinner, q-loading)
+6. Use $q.notify for user feedback following LNBits notification patterns
+7. Follow LNBits form validation patterns with Quasar form components
+8. Use Quasar's color palette variables to match LNBits theming
+9. Ensure extension UI respects LNBits dark/light mode preferences
+10. Implement responsive designs using Quasar's responsive utilities
+11. Use UMD pattern for Vue components to maintain compatibility with LNBits core
+12. Organize Quasar components to match existing LNBits UI patterns
+13. Use Quasar's Dark Mode API to respect LNBits theme settings
+14. Follow existing LNBits error handling patterns with q-notify
+15. Use Quasar's Dialog component for confirmations and forms matching LNBits
+`;
+
+// Python API patterns for LNBits extensions
+const pythonApiPatterns = `
+# Example Python API route patterns for LNBits extension
+
+from fastapi import Depends, Query
+from lnbits.decorators import check_user_exists, validate_checking_admin_key
+
+from . import your_extension_name_ext
+from .crud import (
+    create_record,
+    get_record,
+    get_records,
+    update_record,
+    delete_record
+)
+from .models import CreateRecordData, Record
+
+# Get all records for a wallet
+@your_extension_name_ext.get("/api/v1/extension/your_extension_name/records")
+async def api_get_records(
+    wallet: WalletTypeInfo = Depends(require_admin_key),
+):
+    records = await get_records(wallet.wallet.id)
+    return [record.dict() for record in records]
+
+# Create a new record
+@your_extension_name_ext.post("/api/v1/extension/your_extension_name/record")
+async def api_create_record(
+    data: CreateRecordData, wallet: WalletTypeInfo = Depends(require_admin_key)
+):
+    record = await create_record(wallet_id=wallet.wallet.id, data=data)
+    return record.dict()
+
+# Update an existing record
+@your_extension_name_ext.put(
+    "/api/v1/extension/your_extension_name/record/{record_id}"
+)
+async def api_update_record(
+    record_id: str,
+    data: CreateRecordData,
+    wallet: WalletTypeInfo = Depends(require_admin_key),
+):
+    record = await update_record(wallet_id=wallet.wallet.id, record_id=record_id, data=data)
+    return record.dict()
+
+# Delete a record
+@your_extension_name_ext.delete(
+    "/api/v1/extension/your_extension_name/record/{record_id}"
+)
+async def api_delete_record(
+    record_id: str, wallet: WalletTypeInfo = Depends(require_admin_key)
+):
+    await delete_record(wallet_id=wallet.wallet.id, record_id=record_id)
+    return {"success": True}
+`;
+
+// Example Quasar component implementation in LNBits extension context
+const quasarComponentExample = `
+// Example of a Quasar component implementation for LNBits extension
+export const RecordForm = {
+  name: 'RecordForm',
+  
+  props: {
+    initialData: {
+      type: Object,
+      default: () => ({
+        name: '',
+        description: '',
+        amount: 0
+      })
+    },
+    isEdit: {
+      type: Boolean,
+      default: false
+    }
+  },
+  
+  data() {
+    return {
+      form: { ...this.initialData },
+      loading: false,
+      rules: {
+        name: [val => !!val || 'Name is required'],
+        amount: [
+          val => val > 0 || 'Amount must be greater than 0',
+          val => !isNaN(parseFloat(val)) || 'Amount must be a number'
+        ]
+      }
+    }
+  },
+  
+  methods: {
+    async onSubmit() {
+      this.$refs.form.validate().then(success => {
+        if (success) {
+          this.$emit('submit', this.form)
+        }
+      })
+    },
+    
+    onReset() {
+      this.$refs.form.reset()
+      this.form = { ...this.initialData }
+    }
+  },
+  
+  template: \`
+    <q-form ref="form" @submit.prevent="onSubmit" @reset.prevent="onReset" class="q-gutter-md">
+      <q-input
+        v-model="form.name"
+        label="Name"
+        :rules="rules.name"
+        outlined
+        dense
+        lazy-rules
+      />
+      
+      <q-input
+        v-model="form.description"
+        label="Description"
+        type="textarea"
+        outlined
+        dense
+        autogrow
+      />
+      
+      <q-input
+        v-model.number="form.amount"
+        label="Amount"
+        type="number"
+        :rules="rules.amount"
+        outlined
+        dense
+        step="0.001"
+      />
+      
+      <div class="row q-mt-md">
+        <q-btn
+          :label="isEdit ? 'Update' : 'Create'"
+          type="submit"
+          color="primary"
+          :loading="loading"
+        />
+        <q-btn
+          label="Reset"
+          type="reset"
+          color="grey-7"
+          flat
+          class="q-ml-sm"
+        />
+      </div>
+    </q-form>
+  \`
+}
+`;
+
+// Template syntax rules for LNbits extensions
+const templateSyntaxRules = [
+    // Vue.js template expressions in component files
+    "Use v-text='value' instead of {{ value }}",
+    "Use :attribute='value' instead of {{ value }}",
+    "Use v-html='value' for HTML content",
+    
+    // Jinja2 expressions in index.html
+    "Use {% block %} for template inheritance",
+    "Use {% include %} for component templates",
+    "Use {{ static_url_for() }} for static assets",
+    
+    // Mixing template languages
+    "Keep Vue.js and Jinja2 expressions separate",
+    "Use v-text when displaying dynamic content in components",
+    "Use proper component props instead of passing Jinja variables directly"
+];
+
+// Example of proper template usage
+const templateExample = `
+<!-- In index.html (Jinja2) -->
+{% block scripts %}
+  {{ window_vars(user) }}
+  <script src="{{ static_url_for('extension/static', 'js/components/Component.js') }}"></script>
+{% endblock %}
+
+<!-- In component template (Vue.js) -->
+<template id="component-template">
+  <div>
+    <span v-text="dynamicValue"></span>
+    <div :class="dynamicClass">
+      <q-input v-model="inputValue" />
+    </div>
+  </div>
+</template>
+`;
+
+// Example of component registration
+const componentExample = `
+window.app.component('component-name', {
+  name: 'component-name',
+  template: '#component-template',
+  props: {
+    value: {
+      type: String,
+      required: true
+    }
+  },
+  data() {
+    return {
+      inputValue: ''
+    }
+  }
+})
+`;
+
+// LNBits parent layout and CSS considerations
+const parentLayoutConsiderations = [
+    "Extension content renders inside q-page-container with q-page class",
+    "Page has default padding: q-px-md q-py-lg (md on mobile, lg on desktop)",
+    "Dark/light mode respects parent $q.dark.isActive state",
+    "Use bg-marginal-bg class for headers to match parent style",
+    "Extension inherits parent font settings and Material Icons",
+    "Respect parent responsive breakpoints using $q.screen utilities",
+    "Use parent color palette and theme variables for consistency",
+    "Extension content area has full width minus drawer (230px/260px)",
+    "Footer is transparent with conditional text-dark class"
+];
+
+// Parent layout structure
+const parentLayoutStructure = `
+<q-layout>
+  <q-header> // Main app header </q-header>
+  <q-drawer> // Left side navigation </q-drawer>
+  <q-page-container>
+    <q-page class="q-px-md q-py-lg" :class="{'q-px-lg': $q.screen.gt.xs}">
+      // Extension content renders here
+    </q-page>
+  </q-page-container>
+  <q-footer> // App footer </q-footer>
+</q-layout>
+`;
+
+// Parent responsive classes
+const parentResponsiveClasses = [
+    "gt-xs: Greater than extra small screens",
+    "lt-sm: Less than small screens", 
+    "gt-sm: Greater than small screens",
+    "lt-md: Less than medium screens",
+    "gt-md: Greater than medium screens",
+    "gt-lg: Greater than large screens"
+];
+
+// Parent theme considerations
+const parentThemeConsiderations = [
+    "Use $q.dark.isActive to detect dark mode",
+    "Use bg-marginal-bg for headers/toolbars",
+    "text-dark class applied to light theme text",
+    "Respect parent color palette variables",
+    "Use parent Material Icons font for icons",
+    "Match parent border styles and card elevations",
+    "Follow parent spacing patterns (q-pa-*, q-ma-*)",
+    "Use parent transition timings for animations"
+];
