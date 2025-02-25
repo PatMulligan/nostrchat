@@ -35,13 +35,14 @@ your_extension_name/
   migrations.py         # Database migrations
   models.py            # Data models
   crud.py             # Database operations
-  api_ext.py          # API routes (blueprints)
+  views.py            # Frontend routes
+  views_api.py        # API routes
   config.json         # Extension configuration
+  manifest.json       # Extension manifest
   static/
     js/
       index.js        # Main entry point
       components/     # Vue components
-      views/          # Page views
     css/
       style.css       # Extension-specific styles
     images/           # Extension-specific images
@@ -77,8 +78,8 @@ const apiPatterns = [
     "Make API calls directly using LNbits.api.request instead of separate API service"
 ];
 
-// LNBits component pattern
-const componentPattern = {
+// LNBits component patterns
+const componentPatterns = {
   // Base component pattern
   basic: `
     window.app.component('component-name', {
@@ -523,6 +524,10 @@ window.app = Vue.createApp({
   data() {
     return {
       // State variables here
+      protocol: window.location.protocol,
+      location: '//' + window.location.hostname,
+      loading: false,
+      // Extension specific state
     }
   },
 
@@ -534,11 +539,14 @@ window.app = Vue.createApp({
         const {data} = await LNbits.api.request(
           'GET',
           '/your_extension/api/v1/endpoint',
-          this.g.user.wallets[0].inkey // or adminkey based on needs
+          this.g.user.wallets[0].inkey // Often endpoints require a key
         )
-        // Handle response
+        // notify success if desired
         LNbits.utils.notifySuccess('Success message')
+        // Often what's returned is mapped onto some model
+        this.exampleData.push(mapObject(data))
       } catch (error) {
+        // Error will be passed to the frontend
         LNbits.utils.notifyApiError(error)
       }
     }
@@ -546,7 +554,8 @@ window.app = Vue.createApp({
 
   // To run on startup
   created() {
-    // Initialization here
+    // initialization here
+    this.exampleFunction('lorum')
   }
 })
 `;
@@ -564,15 +573,31 @@ const apiRequestPatterns = [
   "Always include wallet key (inkey/adminkey) as third parameter",
   "Use try/catch with LNbits.utils.notifyApiError",
   "Destructure response to get data: const {data} = await...",
-  "Group related API calls into logical methods"
+  "Map API response data to models where appropriate",
+  "Use proper error handling that passes to frontend",
 ];
 
-// LNbits component registration pattern
-const componentPattern = `
-window.app.component('component-name', {
-  name: 'ComponentName',
-  template: '#component-template',
-  
+// Component registration requirements
+const componentRequirements = [
+  "Always specify template: '#component-id' to match template in index.html",
+  "Component name must match template ID (kebab-case)",
+  "Always include name property matching component name (PascalCase)",
+  "Validate all props with type and required/default",
+  "Register components before app mount",
+  "Template ID in index.html must match component registration"
+];
+
+// Example component registration
+const componentRegistrationExample = `
+// In index.html
+<template id="your-component">
+  {% include("your_extension/components/your-component.html") %}
+</template>
+
+// In your-component.js
+window.app.component('your-component', {
+  name: 'YourComponent',
+  template: '#your-component',  // Must match template ID
   props: {
     propName: {
       type: Type,
@@ -606,27 +631,41 @@ window.app.component('component-name', {
 
 // Script and template loading pattern
 const templatePattern = {
-  // Loading order
   scriptOrder: `
-    <!-- Regular scripts -->
-    <script src="{{ url_for('extension_static', path='js/dependency.js') }}"></script>
+    {% extends "base.html" %}
 
-    <!-- Component templates -->
-    <template id="component-one">{% include("your_extension/components/component-one.html") %}</template>
-    <template id="component-two">{% include("your_extension/components/component-two.html") %}</template>
+    {% block scripts %}
+      {{ window_vars(user) }}
 
-    <!-- Initialize Vue app first -->
-    <script src="{{ static_url_for('extension/static', 'js/index.js') }}"></script>
+      <!-- Component templates must come before scripts -->
+      <template id="component-one">{% include("your_extension/components/component-one.html") %}</template>
+      <template id="component-two">{% include("your_extension/components/component-two.html") %}</template>
 
-    <!-- Components -->
-    <script src="{{ static_url_for('extension/static', 'components/component-one.js') }}"></script>
-    <script src="{{ static_url_for('extension/static', 'components/component-two.js') }}"></script>
+      <!-- Regular scripts -->
+      <script src="{{ url_for('extension_static', path='js/dependency.js') }}"></script>
+
+      <!-- Initialize Vue app first -->
+      <script src="{{ static_url_for('extension/static', 'js/index.js') }}"></script>
+
+      <!-- Components -->
+      <script src="{{ static_url_for('extension/static', 'components/component-one.js') }}"></script>
+      <script src="{{ static_url_for('extension/static', 'components/component-two.js') }}"></script>
+    {% endblock %}
+
+    {% block page %}
+      <div class="row q-col-gutter-md">
+        <!-- Your extension's HTML here -->
+      </div>
+    {% endblock %}
   `,
 
   // Organization rules
   rules: [
+    "Use {% extends 'base.html' %} to inherit the LNbits layout",
+    "Place all scripts and templates in {% block scripts %}",
+    "Place main content in {% block page %}",
     "Keep component templates in separate HTML files under components/",
-    "Include component templates in index.html before scripts",
+    "Include component templates before any scripts",
     "Use template IDs that match component names (kebab-case)",
     "Reference templates in components using template: '#template-id'",
     "Keep Jinja2 includes organized under the extension's template folder",
