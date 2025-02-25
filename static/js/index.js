@@ -18,7 +18,23 @@ window.app = Vue.createApp({
       peers: [],
       activePublicKey: null,
       showAddPeer: false,
-      newPeerKey: null
+      newPeerKey: null,
+      isMobileView: false
+    }
+  },
+
+  computed: {
+    showPeersList() {
+      return !this.$q.screen.lt.md || !this.activePublicKey
+    },
+
+    showChatBox() {
+      return !this.$q.screen.lt.md || this.activePublicKey
+    },
+
+    activePeerName() {
+      const peer = this.peers.find(p => p?.public_key === this.activePublicKey)
+      return peer?.profile?.name || 'Unknown Peer'
     }
   },
 
@@ -211,6 +227,10 @@ window.app = Vue.createApp({
 
     handlePeerSelected(publicKey) {
       this.activePublicKey = publicKey
+    },
+
+    handleBackToList() {
+      this.activePublicKey = null
     },
 
     refreshPeers() {

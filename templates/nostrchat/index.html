@@ -3,11 +3,15 @@
 {% block scripts %} {{ window_vars(user) }}
 
 <style scoped>
+  .full-height {
+    height: 65vh;
+  }
+
   .chat-container {
     position: relative;
     display: grid;
     grid-template-rows: 1fr auto;
-    height: 65vh;
+    height: 100%;
   }
 
   .chat-box {
@@ -21,6 +25,17 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  .peers-list {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .peers-scroll {
+    flex: 1;
+    overflow-y: auto;
   }
 
   .chat-input {
@@ -79,8 +94,27 @@
   <div class="col-12 col-md-7 q-gutter-y-md">
 
     <div v-if="nostracct && nostracct.id" class="col-12">
-      <div class="row q-col-gutter-md">
-        <div class="col-3">
+      <div class="row q-col-gutter-md full-height">
+        <!-- Mobile view switcher -->
+        <div
+          class="col-12 q-mb-md"
+          v-if="$q.screen.lt.md && activePublicKey"
+        >
+          <q-btn
+            flat
+            round
+            icon="arrow_back"
+            color="primary"
+            @click="handleBackToList"
+          />
+          <span class="q-ml-sm" v-text="activePeerName"></span>
+        </div>
+
+        <!-- Peers list -->
+        <div
+          class="col-12 col-md-3"
+          v-show="showPeersList"
+        >
           <peers-list
             :peers="peers"
             :active-public-key="activePublicKey"
@@ -88,13 +122,19 @@
             @show-add-peer="showAddPeer = true"
           />
         </div>
-        <div class="col-9">
+
+        <!-- Chat box -->
+        <div
+          class="col-12 col-md-9"
+          v-show="showChatBox"
+        >
           <chatbox
             ref="directMessagesRef"
             :inkey="g.user.wallets[0].inkey"
             :adminkey="g.user.wallets[0].adminkey"
             :nostracct-id="nostracct.id"
             :active-public-key="activePublicKey"
+            :peers="peers"
             @refresh-peers="refreshPeers"
           />
         </div>
