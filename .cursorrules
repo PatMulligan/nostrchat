@@ -113,7 +113,12 @@ const componentPatterns = {
               '/endpoint',
               this.g.user.wallets[0].adminkey
             )
-            LNbits.utils.notifySuccess('Success')
+            this.$q.notify({
+              type: 'positive',
+              message: 'Operation successful',
+              icon: null,
+              timeout: 5000
+            })
           } catch (error) {
             LNbits.utils.notifyApiError(error)
           }
@@ -151,11 +156,12 @@ Vue.component('YourExtension', () => {
     
     methods: {
       // Methods here utilizing Quasar components and utilities
-      showNotification(message, type = 'positive') {
+      showNotification(message, type = 'positive', icon = 'check', timeout = 5000) {
         this.$q.notify({
           type,
           message,
-          timeout: 5000
+          icon,
+          timeout
         })
       },
       
@@ -542,7 +548,12 @@ window.app = Vue.createApp({
           this.g.user.wallets[0].inkey // Often endpoints require a key
         )
         // notify success if desired
-        LNbits.utils.notifySuccess('Success message')
+        this.$q.notify({
+          type: 'positive',
+          message: 'Success message',
+          icon: 'check',
+          timeout: 5000
+        })
         // Often what's returned is mapped onto some model
         this.exampleData.push(mapObject(data))
       } catch (error) {
@@ -562,11 +573,46 @@ window.app = Vue.createApp({
 
 // LNbits notification patterns
 const notificationPatterns = [
-  "Use LNbits.utils.notifySuccess() for success messages",
+  "Use this.$q.notify() for success/error messages with type: 'positive'/'negative'",
   "Use LNbits.utils.notifyApiError() for API errors",
-  "Use LNbits.utils.notifyError() for general errors",
-  "Use LNbits.utils.confirmDialog() for confirmations"
+  "Use LNbits.utils.confirmDialog().onOk() for confirmations",
+  "Standard notification format: { type, message, icon, timeout: 5000 }",
+  "Success notifications use type: 'positive'",
+  "Error notifications use type: 'negative'",
+  "Warning notifications use type: 'warning'"
 ];
+
+// Example notification usage
+const notificationExamples = `
+// Success notification
+this.$q.notify({
+  type: 'positive',
+  message: 'Operation successful',
+  icon: 'check',
+  timeout: 5000
+})
+
+// Error notification
+this.$q.notify({
+  type: 'negative',
+  message: 'Operation failed',
+  timeout: 5000
+})
+
+// API error handling
+try {
+  // API call
+} catch (error) {
+  LNbits.utils.notifyApiError(error)
+}
+
+// Confirmation dialog
+LNbits.utils
+  .confirmDialog('Are you sure?')
+  .onOk(async () => {
+    // Action on confirmation
+  })
+`;
 
 // LNbits API request patterns
 const apiRequestPatterns = [
@@ -620,7 +666,12 @@ window.app.component('your-component', {
           '/endpoint',
           this.adminkey
         )
-        LNbits.utils.notifySuccess('Success')
+        this.$q.notify({
+          type: 'positive',
+          message: 'Operation successful',
+          icon: 'check',
+          timeout: 5000
+        })
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
