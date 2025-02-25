@@ -65,21 +65,16 @@
             dense
             outlined
             placeholder="Type a message..."
-            :hint="!activePublicKey ? 'Select a peer to start chatting' : null"
             @keyup.enter.prevent="sendDirectMessage"
           >
-            <template v-slot:append>
-              <q-btn
-                :disable="!newMessage || !activePublicKey"
-                round
-                dense
-                flat
-                icon="send"
-                type="submit"
-              >
-                <q-tooltip>Send Message</q-tooltip>
-              </q-btn>
-            </template>
+            <q-btn
+              :disable="!newMessage || !activePublicKey"
+              round
+              dense
+              flat
+              icon="send"
+              type="submit"
+            />
           </q-input>
         </div>
       </div>
