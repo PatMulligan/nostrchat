@@ -14,7 +14,7 @@ from .models import (
     PartialNostrAcct,
 )
 
-######################################## MERCHANT ######################################
+######################################## ACCOUNT ######################################
 
 
 async def create_nostracct(user_id: str, m: PartialNostrAcct) -> NostrAcct:
@@ -231,7 +231,7 @@ async def delete_nostracct_direct_messages(nostracct_id: str) -> None:
     )
 
 
-######################################## CUSTOMERS #####################################
+######################################## PEERS #####################################
 
 
 async def create_peer(nostracct_id: str, data: Peer) -> Peer:
