@@ -125,7 +125,12 @@ window.app = Vue.createApp({
           payload
         )
         this.nostracct = data
-        LNbits.utils.notifySuccess('Nostr Account Created!')
+        this.$q.notify({
+          type: 'positive',
+          message: 'Nostr Account Created!',
+          icon: 'check',
+          timeout: 5000
+        })
         this.waitForNotifications()
       } catch (error) {
         LNbits.utils.notifyApiError(error)
