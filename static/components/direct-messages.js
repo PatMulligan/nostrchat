@@ -14,18 +14,17 @@ window.app.component('direct-messages', {
     inkey: {
       type: String,
       required: true
+    },
+    activePublicKey: {
+      type: String,
+      default: null
     }
   },
 
   data() {
     return {
-      peers: [],
-      unreadMessages: 0,
-      activePublicKey: null,
       messages: [],
-      newMessage: '',
-      showAddPublicKey: false,
-      newPublicKey: null,
+      newMessage: ''
     }
   },
 
@@ -72,20 +71,6 @@ window.app.component('direct-messages', {
       }
     },
 
-    async getPeers() {
-      try {
-        const { data } = await LNbits.api.request(
-          'GET',
-          '/nostrchat/api/v1/peer',
-          this.inkey
-        )
-        this.peers = data
-        this.unreadMessages = data.filter(c => c.unread_messages).length
-      } catch (error) {
-        LNbits.utils.notifyApiError(error)
-      }
-    },
-
     async sendDirectMessage() {
       try {
         const { data } = await LNbits.api.request(
@@ -105,43 +90,15 @@ window.app.component('direct-messages', {
       }
     },
 
-    async addPublicKey() {
-      try {
-        const { data } = await LNbits.api.request(
-          'POST',
-          '/nostrchat/api/v1/peer',
-          this.adminkey,
-          {
-            public_key: this.newPublicKey,
-            nostracct_id: this.nostracctId,
-            unread_messages: 0
-          }
-        )
-        this.newPublicKey = null
-        this.activePublicKey = data.public_key
-        await this.selectActivePeer()
-      } catch (error) {
-        LNbits.utils.notifyApiError(error)
-      } finally {
-        this.showAddPublicKey = false
-      }
-    },
-
-    handleNewMessage: async function (data) {
+    handleNewMessage(data) {
       if (data.peerPubkey === this.activePublicKey) {
         this.messages.push(data.dm)
         this.focusOnChatBox(this.messages.length - 1)
-        // focus back on input box
       }
-      this.getPeersDebounced()
+      this.$emit('refresh-peers')
     },
 
-    selectActivePeer: async function () {
-      await this.getDirectMessages(this.activePublicKey)
-      await this.getPeers()
-    },
-
-    focusOnChatBox: function (index) {
+    focusOnChatBox(index) {
       setTimeout(() => {
         const lastChatBox = document.getElementsByClassName(
           `chat-mesage-index-${index}`
@@ -160,10 +117,5 @@ window.app.component('direct-messages', {
         await this.getDirectMessages(newVal)
       }
     }
-  },
-
-  created() {
-    this.getPeers()
-    this.getPeersDebounced = _.debounce(this.getPeers, 2000, false)
   }
 })
