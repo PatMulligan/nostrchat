@@ -30,10 +30,13 @@
         @click="$emit('peer-selected', peer.public_key)"
         v-ripple
       >
-        <q-item-section>
-          <q-item-label v-text="peer.profile.name || 'unknown'"></q-item-label>
-          <q-item-label caption v-text="peer.profile.about || ''"></q-item-label>
-          <q-item-label caption class="text-truncate" v-text="peer.public_key"></q-item-label>
+        <q-item-section class="peer-item">
+          <q-item-label v-text="getPeerName(peer)"></q-item-label>
+          <q-item-label caption v-text="getPeerAbout(peer)"></q-item-label>
+          <q-item-label caption class="peer-key">
+            <q-tooltip v-text="peer.public_key"></q-tooltip>
+            <span class="ellipsis" v-text="peer.public_key"></span>
+          </q-item-label>
         </q-item-section>
         <q-item-section side v-if="peer.unread_messages">
           <q-badge color="primary" v-text="peer.unread_messages"></q-badge>

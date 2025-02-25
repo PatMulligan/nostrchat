@@ -26,6 +26,22 @@
   .chat-input {
     border-top: 1px solid var(--q-separator-color);
   }
+
+  .peer-item {
+    min-width: 0; /* Enable text truncation in flex items */
+  }
+
+  .peer-key {
+    max-width: 100%;
+    display: block;
+  }
+
+  .peer-key .ellipsis {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 </style>
 
 <template id="key-pair"

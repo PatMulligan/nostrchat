@@ -17,5 +17,15 @@ window.app.component('peers-list', {
     unreadMessages() {
       return (this.peers || []).filter(p => p?.unread_messages).length
     }
+  },
+
+  methods: {
+    getPeerName(peer) {
+      return peer?.profile?.name || 'unknown'
+    },
+    
+    getPeerAbout(peer) {
+      return peer?.profile?.about || ''
+    }
   }
 }) 

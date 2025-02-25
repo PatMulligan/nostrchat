@@ -57,7 +57,7 @@ window.app.component('chatbox', {
     },
 
     activePeerName() {
-      const peer = this.peers.find(p => p.public_key === this.activePublicKey)
+      const peer = (this.peers || []).find(p => p?.public_key === this.activePublicKey)
       return peer?.profile?.name || 'Unknown Peer'
     }
   },
