@@ -230,7 +230,7 @@
     position: relative;
     overflow: hidden;
     height: 100vh;
-    max-height: calc(100vh - 120px); /* Account for header/footer */
+    max-height: calc(100vh - 120px);
   }
 
   /* Make both peers-list and chatbox take full height */
@@ -238,12 +238,12 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding-bottom: 1px; /* Show bottom border */
-    padding-right: 1px; /* Show right border */
+    padding-bottom: 1px;
+    padding-right: 1px;
   }
 
-  /* Make q-cards fill their containers */
-  .peers-list, .chatbox {
+  /* Card styling - simplified */
+  .chat-card {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -273,33 +273,9 @@
     padding: 1rem;
   }
 
-  .peers-list {
-    display: flex;
-    flex-direction: column;
-  }
-
   .peers-scroll {
     flex: 1;
     overflow-y: auto;
-  }
-
-  /* Chat container and box styles - keeping for compatibility */
-  .chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 0; /* Critical for Firefox */
-    padding: 0;
-  }
-
-  .chat-box {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0; /* Critical for Firefox */
-    padding: 1rem;
-    width: 100%;
-    scroll-behavior: smooth;
   }
 
   .chat-input {
