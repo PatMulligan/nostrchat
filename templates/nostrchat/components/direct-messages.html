@@ -139,24 +139,5 @@
         </q-form>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="showRawMessage" position="top">
-      <q-card class="q-pa-lg q-pt-xl" style="width: 500px">
-        <q-form>
-          <q-input
-            filled
-            dense
-            type="textarea"
-            rows="20"
-            v-model.trim="rawMessage"
-            label="Raw Data"
-          ></q-input>
-          <div class="row q-mt-lg">
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-              >Close</q-btn
-            >
-          </div>
-        </q-form>
-      </q-card>
-    </q-dialog>
   </div>
 </div>

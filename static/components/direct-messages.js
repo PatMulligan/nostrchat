@@ -30,8 +30,6 @@ window.app.component('direct-messages', {
       newMessage: '',
       showAddPublicKey: false,
       newPublicKey: null,
-      showRawMessage: false,
-      rawMessage: null
     }
   },
 
@@ -164,11 +162,6 @@ window.app.component('direct-messages', {
     selectActivePeer: async function () {
       await this.getDirectMessages(this.activePublicKey)
       await this.getPeers()
-    },
-
-    showMessageRawData: function (index) {
-      this.rawMessage = this.messages[index]?.message
-      this.showRawMessage = true
     },
 
     focusOnChatBox: function (index) {
