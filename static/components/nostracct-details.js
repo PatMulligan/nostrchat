@@ -55,6 +55,7 @@ window.app.component('nostracct-details', {
         this.$q.notify({
           type: 'positive',
           message: 'Nostr Account data refreshed from Nostr',
+          icon: 'check',
           timeout: 5000
         })
       } catch (error) {
