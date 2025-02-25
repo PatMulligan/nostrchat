@@ -1,5 +1,9 @@
-// Create Vue component for the extension
-window.app = Vue.createApp({
+import {API} from './api.js'
+
+const nostr = window.NostrTools
+
+export const app = Vue.createApp({
+  el: '#vue',
   mixins: [window.windowMixin],
   data() {
     return {
@@ -17,7 +21,7 @@ window.app = Vue.createApp({
   },
   methods: {
     generateKeys: async function () {
-      const privateKey = window.NostrTools.generatePrivateKey()
+      const privateKey = nostr.generatePrivateKey()
       await this.createNostrAcct(privateKey)
     },
     importKeys: async function () {
@@ -28,7 +32,7 @@ window.app = Vue.createApp({
       }
       try {
         if (privateKey.toLowerCase().startsWith('nsec')) {
-          privateKey = window.NostrTools.nip19.decode(privateKey).data
+          privateKey = nostr.nip19.decode(privateKey).data
         }
       } catch (error) {
         this.$q.notify({
@@ -91,29 +95,20 @@ window.app = Vue.createApp({
     },
     async getNostrAcct() {
       try {
-        const {data} = await LNbits.api.request(
-          'GET',
-          '/nostrchat/api/v1/nostracct'
-        )
-        this.nostracct = data
+        this.nostracct = await API.getNostrAcct()
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
     },
     async createNostrAcct(privateKey) {
       try {
-        const pubkey = window.NostrTools.getPublicKey(privateKey)
+        const pubkey = nostr.getPublicKey(privateKey)
         const payload = {
           private_key: privateKey,
           public_key: pubkey,
           config: {}
         }
-        const {data} = await LNbits.api.request(
-          'POST',
-          '/nostrchat/api/v1/nostracct',
-          payload
-        )
-        this.nostracct = data
+        this.nostracct = await API.createNostrAcct(payload)
         this.$q.notify({
           type: 'positive',
           message: 'Nostr Account Created!'
@@ -151,10 +146,7 @@ window.app = Vue.createApp({
         await LNbits.utils.confirmDialog(
           'Are you sure you want to reconnect to the nostrcient extension?'
         )
-        await LNbits.api.request(
-          'PUT',
-          '/nostrchat/api/v1/restart'
-        )
+        await API.restartConnection()
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
@@ -168,6 +160,4 @@ window.app = Vue.createApp({
       }
     }, 1000)
   }
-})
-
-window.app.mount('#vue')
+}) 
