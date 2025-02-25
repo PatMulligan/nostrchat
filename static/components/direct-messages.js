@@ -1,5 +1,6 @@
 window.app.component('direct-messages', {
   name: 'DirectMessages',
+  template: '#direct-messages',
 
   props: {
     activeChatPeer: {
