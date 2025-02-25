@@ -130,14 +130,6 @@ window.app = Vue.createApp({
         LNbits.utils.notifyApiError(error)
       }
     },
-    // TODO: remove this
-    peerSelectedForOrder: function (peerPubkey) {
-      this.activeChatPeer = peerPubkey
-    },
-    // TODO: remove this
-    // filterOrdersForPeer: function (peerPubkey) {
-    //   this.orderPubkey = peerPubkey
-    // },
     waitForNotifications: async function () {
       if (!this.nostracct) return
       try {

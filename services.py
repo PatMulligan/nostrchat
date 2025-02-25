@@ -146,17 +146,6 @@ async def _handle_incoming_dms(
         clear_text_msg,
     )
 
-    # TODO: comment out for now
-    # if json_data:
-    #     reply_type, dm_reply = await _handle_incoming_structured_dm(
-    #         nostracct, new_dm, json_data
-    #     )
-    #     if dm_reply:
-    #         await reply_to_structured_dm(
-    #             nostracct, event.pubkey, reply_type.value, dm_reply
-    #         )
-
-
 async def _handle_outgoing_dms(
     event: NostrEvent, nostracct: NostrAcct, clear_text_msg: str
 ):
@@ -171,25 +160,6 @@ async def _handle_outgoing_dms(
             type=type_.value,
         )
         await create_direct_message(nostracct.id, dm)
-
-
-# TODO: comment out for now
-# async def _handle_incoming_structured_dm(
-#     nostracct: NostrAcct, dm: DirectMessage, json_data: dict
-# ) -> Tuple[DirectMessageType, Optional[str]]:
-#     try:
-#         if dm.type == DirectMessageType.CUSTOMER_ORDER.value and nostracct.config.active:
-#             json_resp = await _handle_new_order(
-#                 nostracct.id, nostracct.public_key, dm, json_data
-#             )
-#
-#             return DirectMessageType.PAYMENT_REQUEST, json_resp
-#
-#     except Exception as ex:
-#         logger.warning(ex)
-#
-#     return DirectMessageType.PLAIN_TEXT, None
-
 
 async def _persist_dm(
     nostracct_id: str,
@@ -220,28 +190,6 @@ async def _persist_dm(
         ),
     )
     return new_dm
-
-
-async def reply_to_structured_dm(
-    nostracct: NostrAcct, peer_pubkey: str, dm_type: int, dm_reply: str
-):
-    dm_event = nostracct.build_dm_event(dm_reply, peer_pubkey)
-    dm = PartialDirectMessage(
-        event_id=dm_event.id,
-        event_created_at=dm_event.created_at,
-        message=dm_reply,
-        public_key=peer_pubkey,
-        type=dm_type,
-    )
-    await create_direct_message(nostracct.id, dm)
-    await nostr_client.publish_nostr_event(dm_event)
-
-    await websocket_updater(
-        nostracct.id,
-        json.dumps(
-            {"type": f"dm:{dm_type}", "peerPubkey": dm.public_key, "dm": dm.dict()}
-        ),
-    )
 
 async def resubscribe_to_all_nostraccts():
     await nostr_client.unsubscribe_nostraccts()
