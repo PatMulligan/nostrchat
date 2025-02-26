@@ -44,15 +44,15 @@
 
       <template v-else>
         <div v-for="(dm, index) in messagesAsJson" :key="index">
+          <!-- TODO: check the timestamp against the original code which uses `:stamp="new Date(dm.event_created_at * 1000).toLocaleString()"` -->
           <q-chat-message
             :class="`chat-message-index-${index}`"
             :text="[dm.message]"
-            :sent="dm.event_pubkey !== activePublicKey"
-            :name="dm.profile?.name || 'unknown'"
-            :stamp="dm.dateFrom"
+            :sent="!dm.incoming"
+            :name="dm.incoming ? dm.profile?.name || 'unknown' : 'me'"
+            :stamp="dm.dateFrom" 
             size="8"
-            text-color="white"
-            :bg-color="dm.event_pubkey !== activePublicKey ? 'primary' : 'grey-7'"
+            :bg-color="dm.incoming ? 'white' : 'light-green-2'"
           >
             <template v-slot:avatar>
               <q-avatar>
