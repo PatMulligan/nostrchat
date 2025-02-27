@@ -65,67 +65,6 @@
       >
         <q-card-section>
           <!-- Header with dropdown -->
-          <div class="row items-center q-mb-md">
-            <div class="col-12 col-md-6 q-mt-sm-md q-mt-md-none text-right">
-              <q-btn-group flat>
-                <q-btn
-                  flat
-                  :color="showQrCodes ? 'primary' : 'grey'"
-                  icon="qr_code"
-                  @click="showQrCodes = !showQrCodes"
-                >
-                  <q-tooltip v-text="showQrCodes ? 'Hide' : 'Show' + ' QR Codes'"></q-tooltip>
-                </q-btn>
-              </q-btn-group>
-            </div>
-          </div>
-
-          <!-- QR Codes Section (conditionally shown) -->
-          <div v-if="showQrCodes" class="row q-col-gutter-md q-mb-md">
-            <div class="col-12 col-md-6 text-center">
-              <div class="text-subtitle1 text-primary q-mb-sm">Public Key QR</div>
-              <div class="cursor-pointer" @click="copyText(npub, 'Public key (npub) copied!')">
-                <lnbits-qrcode
-                  :value="npub"
-                  :options="{width: isMobile ? 150 : 200}"
-                  class="rounded-borders"
-                ></lnbits-qrcode>
-                <div class="text-caption q-mt-sm">Click to copy npub</div>
-              </div>
-            </div>
-            <div class="col-12 col-md-6 text-center">
-              <div class="text-subtitle1 text-primary q-mb-sm">Private Key QR</div>
-              <div v-if="showPrivateKeyQr" class="cursor-pointer">
-                <div @click="copyText(nsec, 'Private key (nsec) copied!')" class="relative-position">
-                  <lnbits-qrcode
-                    :value="nsec"
-                    :options="{width: isMobile ? 150 : 200}"
-                    class="rounded-borders"
-                  ></lnbits-qrcode>
-                  <q-btn
-                    flat
-                    dense
-                    color="negative"
-                    icon="visibility_off"
-                    @click.stop="showPrivateKeyQr = false"
-                    class="absolute-bottom-right q-ma-xs"
-                  >
-                    <q-tooltip>Hide Private Key QR</q-tooltip>
-                  </q-btn>
-                  <div class="text-caption q-mt-sm">Click to copy nsec</div>
-                </div>
-              </div>
-              <div v-else class="flex flex-center" style="height: 200px">
-                <q-btn
-                  color="primary"
-                  icon="visibility"
-                  label="Show Private Key QR"
-                  @click="showPrivateKeyQr = true"
-                />
-              </div>
-            </div>
-          </div>
-
           <!-- Key Information Section -->
           <div class="row q-col-gutter-md">
             <!-- Public Key Section -->
@@ -200,6 +139,67 @@
               </q-input>
             </div>
           </div>
+          <div class="row items-center q-mt-md">
+            <div class="col-12 col-md-6 q-mt-sm-md q-mt-md-none text-left">
+              <q-btn-group flat>
+                <q-btn
+                  flat
+                  :color="showQrCodes ? 'primary' : 'grey'"
+                  icon="qr_code"
+                  @click="showQrCodes = !showQrCodes"
+                >
+                  <q-tooltip v-text="showQrCodes ? 'Hide' : 'Show' + ' QR Codes'"></q-tooltip>
+                </q-btn>
+              </q-btn-group>
+            </div>
+          </div>
+
+          <!-- QR Codes Section (conditionally shown) -->
+          <div v-if="showQrCodes" class="row q-col-gutter-md q-mb-md">
+            <div class="col-12 col-md-6 text-center">
+              <div class="text-subtitle1 text-primary q-mb-sm">Public Key QR</div>
+              <div class="cursor-pointer" @click="copyText(npub, 'Public key (npub) copied!')">
+                <lnbits-qrcode
+                  :value="npub"
+                  :options="{width: isMobile ? 150 : 200}"
+                  class="rounded-borders"
+                ></lnbits-qrcode>
+                <div class="text-caption q-mt-sm">Click to copy npub</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 text-center">
+              <div class="text-subtitle1 text-primary q-mb-sm">Private Key QR</div>
+              <div v-if="showPrivateKeyQr" class="cursor-pointer">
+                <div @click="copyText(nsec, 'Private key (nsec) copied!')" class="relative-position">
+                  <lnbits-qrcode
+                    :value="nsec"
+                    :options="{width: isMobile ? 150 : 200}"
+                    class="rounded-borders"
+                  ></lnbits-qrcode>
+                  <q-btn
+                    flat
+                    dense
+                    color="negative"
+                    icon="visibility_off"
+                    @click.stop="showPrivateKeyQr = false"
+                    class="absolute-bottom-right q-ma-xs"
+                  >
+                    <q-tooltip>Hide Private Key QR</q-tooltip>
+                  </q-btn>
+                  <div class="text-caption q-mt-sm">Click to copy nsec</div>
+                </div>
+              </div>
+              <div v-else class="flex flex-center" style="height: 200px">
+                <q-btn
+                  color="primary"
+                  icon="visibility"
+                  label="Show Private Key QR"
+                  @click="showPrivateKeyQr = true"
+                />
+              </div>
+            </div>
+          </div>
+
         </q-card-section>
       </q-expansion-item>
 
