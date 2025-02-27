@@ -1,6 +1,7 @@
 window.app.component('nostracct-details', {
   name: 'nostracct-details',
   template: '#nostracct-details',
+  delimiters: ['${', '}'],
   props: {
     nostracctId: {
       type: String,
@@ -14,83 +15,131 @@ window.app.component('nostracct-details', {
       type: String,
       required: true
     },
-    showKeys: {
-      type: Boolean,
-      default: false
+    publicKey: {
+      type: String,
+      required: true
+    },
+    privateKey: {
+      type: String,
+      required: true
     }
   },
-  delimiters: ['${', '}'],
   data: function () {
-    return {}
+    return {
+      showPrivateKeyText: false,
+      showPrivateKeyQr: false,
+      showQrCodes: false,
+      loading: false
+    }
+  },
+  computed: {
+    npub() {
+      try {
+        if (this.publicKey) {
+          return window.NostrTools.nip19.npubEncode(this.publicKey)
+        }
+      } catch (error) {
+        console.error('Error encoding npub:', error)
+      }
+      return ''
+    },
+    nsec() {
+      try {
+        if (this.privateKey) {
+          return window.NostrTools.nip19.nsecEncode(this.privateKey)
+        }
+      } catch (error) {
+        console.error('Error encoding nsec:', error)
+      }
+      return ''
+    },
+    isMobile() {
+      return this.$q.screen.lt.md
+    }
   },
   methods: {
-    toggleShowKeys: async function () {
-      this.$emit('toggle-show-keys')
+    copyText: function (text, message, position) {
+      var notify = this.$q.notify
+      Quasar.copyToClipboard(text).then(function () {
+        notify({
+          type: 'positive',
+          message: message || 'Copied to clipboard!',
+          position: position || 'bottom'
+        })
+      })
     },
-
-    republishNostrAcctData: async function () {
+    async requeryNostrAcctData() {
       try {
-        await LNbits.api.request(
+        this.loading = true
+        const { data } = await LNbits.api.request(
           'PUT',
-          `/nostrchat/api/v1/nostracct/${this.nostracctId}/nostr`,
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}/requery`,
           this.adminkey
         )
+        this.$emit('nostracct-updated', data)
         this.$q.notify({
           type: 'positive',
-          message: 'Nostr Account data republished to Nostr',
+          message: 'Nostr account data refreshed from Nostr',
           timeout: 5000
         })
       } catch (error) {
-        console.warn(error)
         LNbits.utils.notifyApiError(error)
+      } finally {
+        this.loading = false
       }
     },
-    requeryNostrAcctData: async function () {
+    async republishNostrAcctData() {
       try {
-        await LNbits.api.request(
-          'GET',
-          `/nostrchat/api/v1/nostracct/${this.nostracctId}/nostr`,
+        this.loading = true
+        const { data } = await LNbits.api.request(
+          'PUT',
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}/republish`,
           this.adminkey
         )
+        this.$emit('nostracct-updated', data)
         this.$q.notify({
           type: 'positive',
-          message: 'Nostr Account data refreshed from Nostr',
-          icon: 'check',
+          message: 'Nostr account data republished to Nostr',
           timeout: 5000
         })
       } catch (error) {
-        console.warn(error)
         LNbits.utils.notifyApiError(error)
+      } finally {
+        this.loading = false
       }
     },
-
     async deleteNostrAcct() {
-      try {
-        await LNbits.utils
-          .confirmDialog(
-            'Are you sure you want to delete this Nostr Account?'
-          )
-          .onOk(async () => {
+      LNbits.utils
+        .confirmDialog('Are you sure you want to delete this Nostr account?')
+        .onOk(async () => {
+          try {
+            this.loading = true
             await LNbits.api.request(
               'DELETE',
               `/nostrchat/api/v1/nostracct/${this.nostracctId}`,
               this.adminkey
             )
             this.$emit('nostracct-deleted')
-          })
-      } catch (error) {
-        LNbits.utils.notifyApiError(error)
-      }
+            this.$q.notify({
+              type: 'positive',
+              message: 'Nostr account deleted',
+              timeout: 5000
+            })
+          } catch (error) {
+            LNbits.utils.notifyApiError(error)
+          } finally {
+            this.loading = false
+          }
+        })
     },
-    deleteNostrAcctFromNostr: function () {
+    async deleteNostrAcctFromNostr() {
       LNbits.utils
         .confirmDialog(
-          `
-             Do you want to remove the nostracct from Nostr?
-            `
+          'Are you sure you want to delete this Nostr account from Nostr?'
         )
         .onOk(async () => {
           try {
+            this.loading = true
             await LNbits.api.request(
               'DELETE',
               `/nostrchat/api/v1/nostracct/${this.nostracctId}/nostr`,
@@ -98,15 +147,15 @@ window.app.component('nostracct-details', {
             )
             this.$q.notify({
               type: 'positive',
-              message: 'Nostr Account Deleted from Nostr',
+              message: 'Nostr account deleted from Nostr',
               timeout: 5000
             })
           } catch (error) {
-            console.warn(error)
             LNbits.utils.notifyApiError(error)
+          } finally {
+            this.loading = false
           }
         })
     }
-  },
-  created: async function () { }
+  }
 })

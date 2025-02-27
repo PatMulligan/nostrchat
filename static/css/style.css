@@ -1,0 +1,14 @@
+/* Add these styles for the nostracct-details component */
+@media (max-width: 1023px) {
+  .full-width-mobile {
+    width: 100%;
+  }
+  
+  .q-input.mobile-input {
+    font-size: 0.85rem;
+  }
+  
+  .q-input.mobile-input .q-field__native {
+    word-break: break-all;
+  }
+} 
