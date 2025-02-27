@@ -22,6 +22,10 @@ window.app.component('nostracct-details', {
     privateKey: {
       type: String,
       required: true
+    },
+    profileData: {
+      type: Object,
+      default: () => ({})
     }
   },
   data: function () {
@@ -29,7 +33,13 @@ window.app.component('nostracct-details', {
       showPrivateKeyText: false,
       showPrivateKeyQr: false,
       showQrCodes: false,
-      loading: false
+      loading: false,
+      savingProfile: false,
+      profile: {
+        displayName: '',
+        username: '',
+        about: ''
+      }
     }
   },
   computed: {
@@ -68,6 +78,61 @@ window.app.component('nostracct-details', {
         })
       })
     },
+    editProfile() {
+      // Find the profile expansion item and open it
+      const profileExpansion = document.querySelectorAll('.q-expansion-item')[1]
+      if (profileExpansion && profileExpansion.__vue__) {
+        profileExpansion.__vue__.show()
+      }
+    },
+    async loadProfile() {
+      try {
+        this.loading = true
+        const { data } = await LNbits.api.request(
+          'GET',
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}/profile`,
+          this.inkey
+        )
+        
+        // Update profile data
+        this.profile.displayName = data.display_name || ''
+        this.profile.username = data.username || ''
+        this.profile.about = data.about || ''
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      } finally {
+        this.loading = false
+      }
+    },
+    async saveProfile() {
+      try {
+        this.savingProfile = true
+        
+        const profileData = {
+          display_name: this.profile.displayName,
+          username: this.profile.username,
+          about: this.profile.about
+        }
+        
+        const { data } = await LNbits.api.request(
+          'PUT',
+          `/nostrchat/api/v1/nostracct/${this.nostracctId}/profile`,
+          this.adminkey,
+          profileData
+        )
+        
+        this.$emit('nostracct-updated', data)
+        this.$q.notify({
+          type: 'positive',
+          message: 'Profile updated and published to Nostr',
+          timeout: 5000
+        })
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      } finally {
+        this.savingProfile = false
+      }
+    },
     async requeryNostrAcctData() {
       try {
         this.loading = true
@@ -77,6 +142,10 @@ window.app.component('nostracct-details', {
           this.adminkey
         )
         this.$emit('nostracct-updated', data)
+        
+        // Update profile data after requery
+        await this.loadProfile()
+        
         this.$q.notify({
           type: 'positive',
           message: 'Nostr account data refreshed from Nostr',
@@ -157,5 +226,9 @@ window.app.component('nostracct-details', {
           }
         })
     }
+  },
+  created() {
+    // Load profile data when component is created
+    this.loadProfile()
   }
 })

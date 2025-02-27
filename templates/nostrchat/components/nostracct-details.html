@@ -1,202 +1,269 @@
 <q-card>
   <q-card-section>
-    <!-- Header with dropdown -->
-    <div class="row items-center q-mb-md">
-      <div class="col-12 col-md-6">
-        <q-btn-dropdown
-          split
-          unelevated
-          color="primary"
-          icon="person"
-          label="Nostr Account"
-          class="full-width-mobile"
-        >
-          <q-list>
-            <q-item disable clickable v-close-popup>
-              <q-item-section>
-                <q-item-label>NostrAcct Profile</q-item-label>
-                <q-item-label caption
-                  >Edit the account name, description, etc</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-            <q-item @click="requeryNostrAcctData" clickable v-close-popup>
-              <q-item-section>
-                <q-item-label>Refresh from Nostr</q-item-label>
-                <q-item-label caption
-                  >Requery account data from Nostr</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-            <q-item @click="republishNostrAcctData" clickable v-close-popup>
-              <q-item-section>
-                <q-item-label>Republish to Nostr</q-item-label>
-                <q-item-label caption
-                  >Republish Nostr Account Data to Nostr</q-item-label
-                >
-              </q-item-section>
-            </q-item>
+            <div class="col-12 col-md-6">
+              <q-btn-dropdown
+                split
+                unelevated
+                color="primary"
+                icon="person"
+                label="Nostr Account"
+                class="full-width-mobile"
+              >
+                <q-list>
+                  <q-item @click="editProfile" clickable v-close-popup>
+                    <q-item-section>
+                      <q-item-label>NostrAcct Profile</q-item-label>
+                      <q-item-label caption
+                        >Edit the account name, description, etc</q-item-label
+                      >
+                    </q-item-section>
+                  </q-item>
+                  <q-item @click="requeryNostrAcctData" clickable v-close-popup>
+                    <q-item-section>
+                      <q-item-label>Refresh from Nostr</q-item-label>
+                      <q-item-label caption
+                        >Requery account data from Nostr</q-item-label
+                      >
+                    </q-item-section>
+                  </q-item>
+                  <q-item @click="republishNostrAcctData" clickable v-close-popup>
+                    <q-item-section>
+                      <q-item-label>Republish to Nostr</q-item-label>
+                      <q-item-label caption
+                        >Republish Nostr Account Data to Nostr</q-item-label
+                      >
+                    </q-item-section>
+                  </q-item>
 
-            <q-item @click="deleteNostrAcct" clickable v-close-popup>
-              <q-item-section>
-                <q-item-label>Delete from DB</q-item-label>
-                <q-item-label caption
-                  >Delete Nostr Account from database</q-item-label
+                  <q-item @click="deleteNostrAcct" clickable v-close-popup>
+                    <q-item-section>
+                      <q-item-label>Delete from DB</q-item-label>
+                      <q-item-label caption
+                        >Delete Nostr Account from database</q-item-label
+                      >
+                    </q-item-section>
+                  </q-item>
+                  <q-item @click="deleteNostrAcctFromNostr" clickable v-close-popup>
+                    <q-item-section>
+                      <q-item-label>Delete from Nostr</q-item-label>
+                      <q-item-label caption
+                        >Delete Nostr Account from Nostr</q-item-label
+                      >
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
+    <!-- Collapsible Sections -->
+    <div class="q-mb-md">
+      <!-- Key Information Section -->
+      <q-expansion-item
+        expand-separator
+        icon="vpn_key"
+        label="Key Information"
+        default-opened
+        header-class="text-primary"
+      >
+        <q-card-section>
+          <!-- Header with dropdown -->
+          <div class="row items-center q-mb-md">
+            <div class="col-12 col-md-6 q-mt-sm-md q-mt-md-none text-right">
+              <q-btn-group flat>
+                <q-btn
+                  flat
+                  :color="showQrCodes ? 'primary' : 'grey'"
+                  icon="qr_code"
+                  @click="showQrCodes = !showQrCodes"
                 >
-              </q-item-section>
-            </q-item>
-            <q-item @click="deleteNostrAcctFromNostr" clickable v-close-popup>
-              <q-item-section>
-                <q-item-label>Delete from Nostr</q-item-label>
-                <q-item-label caption
-                  >Delete Nostr Account from Nostr</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-      </div>
-      <div class="col-12 col-md-6 q-mt-sm-md q-mt-md-none text-right">
-        <q-btn-group flat>
-          <q-btn
-            flat
-            :color="showQrCodes ? 'primary' : 'grey'"
-            icon="qr_code"
-            @click="showQrCodes = !showQrCodes"
-          >
-            <q-tooltip v-text="showQrCodes ? 'Hide' : 'Show' + ' QR Codes'"></q-tooltip>
-          </q-btn>
-        </q-btn-group>
-      </div>
-    </div>
-
-    <!-- QR Codes Section (conditionally shown) -->
-    <div v-if="showQrCodes" class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-md-6 text-center">
-        <div class="text-subtitle1 text-primary q-mb-sm">Public Key QR</div>
-        <div class="cursor-pointer" @click="copyText(npub, 'Public key (npub) copied!')">
-          <lnbits-qrcode
-            :value="npub"
-            :options="{width: isMobile ? 150 : 200}"
-            class="rounded-borders"
-          ></lnbits-qrcode>
-          <div class="text-caption q-mt-sm">Click to copy npub</div>
-        </div>
-      </div>
-      <div class="col-12 col-md-6 text-center">
-        <div class="text-subtitle1 text-primary q-mb-sm">Private Key QR</div>
-        <div v-if="showPrivateKeyQr" class="cursor-pointer">
-          <div @click="copyText(nsec, 'Private key (nsec) copied!')" class="relative-position">
-            <lnbits-qrcode
-              :value="nsec"
-              :options="{width: isMobile ? 150 : 200}"
-              class="rounded-borders"
-            ></lnbits-qrcode>
-            <q-btn
-              flat
-              dense
-              color="negative"
-              icon="visibility_off"
-              @click.stop="showPrivateKeyQr = false"
-              class="absolute-bottom-right q-ma-xs"
-            >
-              <q-tooltip>Hide Private Key QR</q-tooltip>
-            </q-btn>
-            <div class="text-caption q-mt-sm">Click to copy nsec</div>
+                  <q-tooltip v-text="showQrCodes ? 'Hide' : 'Show' + ' QR Codes'"></q-tooltip>
+                </q-btn>
+              </q-btn-group>
+            </div>
           </div>
-        </div>
-        <div v-else class="flex flex-center" style="height: 200px">
-          <q-btn
-            color="primary"
-            icon="visibility"
-            label="Show Private Key QR"
-            @click="showPrivateKeyQr = true"
-          />
-        </div>
-      </div>
-    </div>
 
-    <!-- Key Information Section -->
-    <div class="row q-col-gutter-md">
-      <!-- Public Key Section -->
-      <div class="col-12 col-md-6">
-        <div class="text-subtitle1 text-primary q-mb-sm">Public Key</div>
-        <q-input
-          v-model="npub"
-          readonly
-          dense
-          dark
-          bg-color="dark"
-          type="text"
-          label="Public Key (npub)"
-          class="q-mb-sm mobile-input"
-        >
-          <template v-slot:append>
-            <q-btn flat dense icon="content_copy" @click="copyText(npub, 'Public key (npub) copied!')">
-              <q-tooltip>Copy npub</q-tooltip>
-            </q-btn>
-          </template>
-        </q-input>
+          <!-- QR Codes Section (conditionally shown) -->
+          <div v-if="showQrCodes" class="row q-col-gutter-md q-mb-md">
+            <div class="col-12 col-md-6 text-center">
+              <div class="text-subtitle1 text-primary q-mb-sm">Public Key QR</div>
+              <div class="cursor-pointer" @click="copyText(npub, 'Public key (npub) copied!')">
+                <lnbits-qrcode
+                  :value="npub"
+                  :options="{width: isMobile ? 150 : 200}"
+                  class="rounded-borders"
+                ></lnbits-qrcode>
+                <div class="text-caption q-mt-sm">Click to copy npub</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 text-center">
+              <div class="text-subtitle1 text-primary q-mb-sm">Private Key QR</div>
+              <div v-if="showPrivateKeyQr" class="cursor-pointer">
+                <div @click="copyText(nsec, 'Private key (nsec) copied!')" class="relative-position">
+                  <lnbits-qrcode
+                    :value="nsec"
+                    :options="{width: isMobile ? 150 : 200}"
+                    class="rounded-borders"
+                  ></lnbits-qrcode>
+                  <q-btn
+                    flat
+                    dense
+                    color="negative"
+                    icon="visibility_off"
+                    @click.stop="showPrivateKeyQr = false"
+                    class="absolute-bottom-right q-ma-xs"
+                  >
+                    <q-tooltip>Hide Private Key QR</q-tooltip>
+                  </q-btn>
+                  <div class="text-caption q-mt-sm">Click to copy nsec</div>
+                </div>
+              </div>
+              <div v-else class="flex flex-center" style="height: 200px">
+                <q-btn
+                  color="primary"
+                  icon="visibility"
+                  label="Show Private Key QR"
+                  @click="showPrivateKeyQr = true"
+                />
+              </div>
+            </div>
+          </div>
 
-        <q-input
-          v-model="publicKey"
-          readonly
-          dense
-          dark
-          bg-color="dark"
-          type="text"
-          label="Public Hex"
-          class="mobile-input"
-        >
-          <template v-slot:append>
-            <q-btn flat dense icon="content_copy" @click="copyText(publicKey, 'Public key (hex) copied!')">
-              <q-tooltip>Copy hex</q-tooltip>
-            </q-btn>
-          </template>
-        </q-input>
-      </div>
+          <!-- Key Information Section -->
+          <div class="row q-col-gutter-md">
+            <!-- Public Key Section -->
+            <div class="col-12 col-md-6">
+              <div class="text-subtitle1 text-primary q-mb-sm">Public Key</div>
+              <q-input
+                v-model="npub"
+                readonly
+                dense
+                type="text"
+                label="Public Key (npub)"
+                class="q-mb-sm mobile-input"
+              >
+                <template v-slot:append>
+                  <q-btn flat dense icon="content_copy" @click="copyText(npub, 'Public key (npub) copied!')">
+                    <q-tooltip>Copy npub</q-tooltip>
+                  </q-btn>
+                </template>
+              </q-input>
 
-      <!-- Private Key Section -->
-      <div class="col-12 col-md-6">
-        <div class="text-subtitle1 text-primary q-mb-sm">Private Key</div>
-        <q-input
-          v-model="nsec"
-          readonly
-          dense
-          dark
-          bg-color="dark"
-          :type="showPrivateKeyText ? 'text' : 'password'"
-          label="Private Key (nsec)"
-          class="q-mb-sm mobile-input"
-        >
-          <template v-slot:append>
-            <q-btn flat dense :icon="showPrivateKeyText ? 'visibility_off' : 'visibility'" 
-                  @click="showPrivateKeyText = !showPrivateKeyText" class="q-mr-xs">
-              <q-tooltip v-text="showPrivateKeyText ? 'Hide' : 'Show'"></q-tooltip>
-            </q-btn>
-            <q-btn flat dense icon="content_copy" @click="copyText(nsec, 'Private key (nsec) copied!')">
-              <q-tooltip>Copy nsec</q-tooltip>
-            </q-btn>
-          </template>
-        </q-input>
+              <q-input
+                v-model="publicKey"
+                readonly
+                dense
+                type="text"
+                label="Public Hex"
+                class="mobile-input"
+              >
+                <template v-slot:append>
+                  <q-btn flat dense icon="content_copy" @click="copyText(publicKey, 'Public key (hex) copied!')">
+                    <q-tooltip>Copy hex</q-tooltip>
+                  </q-btn>
+                </template>
+              </q-input>
+            </div>
 
-        <q-input
-          v-model="privateKey"
-          readonly
-          dense
-          dark
-          bg-color="dark"
-          :type="showPrivateKeyText ? 'text' : 'password'"
-          label="Private Hex"
-          class="mobile-input"
-        >
-          <template v-slot:append>
-            <q-btn flat dense icon="content_copy" @click="copyText(privateKey, 'Private key (hex) copied!')">
-              <q-tooltip>Copy hex</q-tooltip>
-            </q-btn>
-          </template>
-        </q-input>
-      </div>
+            <!-- Private Key Section -->
+            <div class="col-12 col-md-6">
+              <div class="text-subtitle1 text-primary q-mb-sm">Private Key</div>
+              <q-input
+                v-model="nsec"
+                readonly
+                dense
+                :type="showPrivateKeyText ? 'text' : 'password'"
+                label="Private Key (nsec)"
+                class="q-mb-sm mobile-input"
+              >
+                <template v-slot:append>
+                  <q-btn flat dense :icon="showPrivateKeyText ? 'visibility_off' : 'visibility'" 
+                        @click="showPrivateKeyText = !showPrivateKeyText" class="q-mr-xs">
+                    <q-tooltip v-text="showPrivateKeyText ? 'Hide' : 'Show'"></q-tooltip>
+                  </q-btn>
+                  <q-btn flat dense icon="content_copy" @click="copyText(nsec, 'Private key (nsec) copied!')">
+                    <q-tooltip>Copy nsec</q-tooltip>
+                  </q-btn>
+                </template>
+              </q-input>
+
+              <q-input
+                v-model="privateKey"
+                readonly
+                dense
+                :type="showPrivateKeyText ? 'text' : 'password'"
+                label="Private Hex"
+                class="mobile-input"
+              >
+                <template v-slot:append>
+                  <q-btn flat dense icon="content_copy" @click="copyText(privateKey, 'Private key (hex) copied!')">
+                    <q-tooltip>Copy hex</q-tooltip>
+                  </q-btn>
+                </template>
+              </q-input>
+            </div>
+          </div>
+        </q-card-section>
+      </q-expansion-item>
+
+      <!-- Profile Information Section -->
+      <q-expansion-item
+        expand-separator
+        icon="person"
+        label="Profile Information"
+        header-class="text-primary"
+      >
+        <q-card-section>
+          <!-- Display Name -->
+          <div class="q-mb-md">
+            <q-input
+              v-model="profile.displayName"
+              label="Display Name"
+              filled
+              dense
+              square
+              class="full-width"
+            />
+          </div>
+          
+          <!-- Username -->
+          <div class="q-mb-md">
+            <q-input
+              v-model="profile.username"
+              label="Username"
+              filled
+              dense
+              square
+              class="full-width"
+            />
+          </div>
+          
+          <!-- About Me -->
+          <div class="q-mb-md">
+            <q-input
+              v-model="profile.about"
+              label="About Me"
+              filled
+              dense
+              square
+              type="textarea"
+              autogrow
+              rows="3"
+              class="full-width"
+            />
+          </div>
+          
+          <!-- Save button -->
+          <div class="text-right q-mt-lg">
+            <q-btn
+              color="green"
+              label="SAVE"
+              @click="saveProfile"
+              :loading="savingProfile"
+              unelevated
+              no-caps
+            />
+          </div>
+        </q-card-section>
+      </q-expansion-item>
     </div>
   </q-card-section>
 </q-card>
