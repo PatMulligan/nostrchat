@@ -153,7 +153,13 @@ window.app = Vue.createApp({
           icon: 'check',
           timeout: 5000
         })
-        this.waitForNotifications()
+        
+        // Add a short delay to ensure backend is ready before connecting
+        setTimeout(() => {
+          this.waitForNotifications()
+          // Also refresh peers after account creation
+          this.getPeers()
+        }, 1000)
       } catch (error) {
         LNbits.utils.notifyApiError(error)
       }
@@ -358,9 +364,23 @@ window.app = Vue.createApp({
   watch: {
     'nostracct.id': {
       immediate: true,
-      handler(newVal) {
+      handler(newVal, oldVal) {
         if (newVal) {
           this.getPeers()
+          
+          // If this is a change in account ID (not just initial load)
+          if (oldVal !== undefined && newVal !== oldVal) {
+            // Close any existing connection
+            if (this.wsConnection) {
+              this.wsConnection.close()
+              this.wsConnection = null
+            }
+            
+            // Establish new connection with short delay
+            setTimeout(() => {
+              this.waitForNotifications()
+            }, 1000)
+          }
         }
       }
     },
