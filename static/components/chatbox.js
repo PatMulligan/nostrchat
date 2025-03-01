@@ -138,6 +138,15 @@ window.app.component('chatbox', {
       if (chatBox) {
         chatBox.scrollTop = chatBox.scrollHeight
       }
+    },
+
+    // Add a new method to focus the message input
+    focusMessageInput() {
+      this.$nextTick(() => {
+        if (this.$refs.messageInput) {
+          this.$refs.messageInput.focus()
+        }
+      })
     }
   },
 

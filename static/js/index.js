@@ -276,6 +276,12 @@ window.app = Vue.createApp({
 
     handlePeerSelected(publicKey) {
       this.activePublicKey = publicKey
+      // Add a slight delay to ensure the DOM has updated
+      this.$nextTick(() => {
+        if (this.$refs.directMessagesRef) {
+          this.$refs.directMessagesRef.focusMessageInput()
+        }
+      })
     },
 
     handleBackToList() {
