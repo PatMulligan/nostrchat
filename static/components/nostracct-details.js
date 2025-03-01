@@ -32,7 +32,6 @@ window.app.component('nostracct-details', {
     return {
       showPrivateKeyText: false,
       showPrivateKeyQr: false,
-      showQrCodes: false,
       loading: false,
       savingProfile: false,
       profile: {
@@ -93,7 +92,7 @@ window.app.component('nostracct-details', {
           `/nostrchat/api/v1/nostracct/${this.nostracctId}/profile`,
           this.inkey
         )
-        
+
         // Update profile data
         this.profile.displayName = data.display_name || ''
         this.profile.username = data.username || ''
@@ -107,20 +106,20 @@ window.app.component('nostracct-details', {
     async saveProfile() {
       try {
         this.savingProfile = true
-        
+
         const profileData = {
           display_name: this.profile.displayName,
           username: this.profile.username,
           about: this.profile.about
         }
-        
+
         const { data } = await LNbits.api.request(
           'PUT',
           `/nostrchat/api/v1/nostracct/${this.nostracctId}/profile`,
           this.adminkey,
           profileData
         )
-        
+
         this.$emit('nostracct-updated', data)
         this.$q.notify({
           type: 'positive',
@@ -142,10 +141,10 @@ window.app.component('nostracct-details', {
           this.adminkey
         )
         this.$emit('nostracct-updated', data)
-        
+
         // Update profile data after requery
         await this.loadProfile()
-        
+
         this.$q.notify({
           type: 'positive',
           message: 'Nostr account data refreshed from Nostr',
