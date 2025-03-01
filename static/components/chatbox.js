@@ -116,7 +116,7 @@ window.app.component('chatbox', {
       if (data.peerPubkey === this.activePublicKey) {
         // Check if this message already exists in our messages array
         const messageExists = this.messages.some(msg => msg.event_id === data.dm.event_id)
-        
+
         if (!messageExists) {
           this.messages.push(data.dm)
           this.$nextTick(() => {
@@ -124,7 +124,7 @@ window.app.component('chatbox', {
           })
         }
       }
-      
+
       // Throttle refresh-peers events to at most once per second
       const now = Date.now()
       if (now - this.lastRefreshTime > 1000) {

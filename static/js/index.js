@@ -164,8 +164,8 @@ window.app = Vue.createApp({
       try {
         // Close existing connection if it exists
         if (this.wsConnection) {
-          if (this.wsConnection.readyState === WebSocket.OPEN || 
-              this.wsConnection.readyState === WebSocket.CONNECTING) {
+          if (this.wsConnection.readyState === WebSocket.OPEN ||
+            this.wsConnection.readyState === WebSocket.CONNECTING) {
             // Connection exists and is either open or connecting, no need to create a new one
             return
           } else {
@@ -181,21 +181,21 @@ window.app = Vue.createApp({
 
         console.log("Connecting to notifications at:", wsUrl)
         this.wsConnection = new WebSocket(wsUrl)
-        
+
         this.wsConnection.addEventListener('open', () => {
           console.log("WebSocket connection established")
         })
-        
+
         this.wsConnection.addEventListener('close', () => {
           console.log("WebSocket connection closed")
           // Don't immediately reconnect here - let the interval handle it
         })
-        
+
         this.wsConnection.addEventListener('error', (error) => {
           console.error("WebSocket error:", error)
           this.wsConnection = null // Clear reference on error
         })
-        
+
         this.wsConnection.addEventListener('message', async ({ data }) => {
           const parsedData = JSON.parse(data)
           if (parsedData.type === 'dm:-1') {
@@ -230,13 +230,13 @@ window.app = Vue.createApp({
         clearTimeout(this.peerRefreshTimeout)
         this.peerRefreshTimeout = null
       }
-      
+
       // If a refresh is already in progress, schedule another one for later
       if (this.peerRefreshInProgress) {
         this.peerRefreshTimeout = setTimeout(() => this.getPeers(), 500)
         return
       }
-      
+
       this.peerRefreshInProgress = true
       try {
         const { data } = await LNbits.api.request(
@@ -299,14 +299,14 @@ window.app = Vue.createApp({
   created() {
     this.getNostrAcct()
     window.addEventListener('resize', this.handleResize)
-    
+
     // Check connection status every 5 seconds instead of every second
     this.wsCheckInterval = setInterval(() => {
       if (!this.nostracct) return
-      
-      if (!this.wsConnection || 
-          this.wsConnection.readyState === WebSocket.CLOSED || 
-          this.wsConnection.readyState === WebSocket.CLOSING) {
+
+      if (!this.wsConnection ||
+        this.wsConnection.readyState === WebSocket.CLOSED ||
+        this.wsConnection.readyState === WebSocket.CLOSING) {
         console.log("WebSocket reconnecting...")
         this.waitForNotifications()
       }
@@ -318,12 +318,12 @@ window.app = Vue.createApp({
     if (this.wsCheckInterval) {
       clearInterval(this.wsCheckInterval)
     }
-    
+
     if (this.wsConnection) {
       this.wsConnection.close()
       this.wsConnection = null
     }
-    
+
     window.removeEventListener('resize', this.handleResize)
   },
 
