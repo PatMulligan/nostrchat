@@ -136,7 +136,7 @@ class PartialDirectMessage(BaseModel):
     message: str
     public_key: str
     type: int = DirectMessageType.PLAIN_TEXT.value
-    incoming: bool = False
+    incoming: bool = False  # Default to outgoing if not specified
     time: Optional[int] = None
 
     @classmethod

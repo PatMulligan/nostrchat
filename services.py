@@ -54,36 +54,53 @@ async def sign_and_send_to_nostr(
 
     return event
 
-
-async def send_dm(
-    nostracct: NostrAcct,
-    other_pubkey: str,
-    type_: int,
-    dm_content: str,
-):
-    dm_event = nostracct.build_dm_event(dm_content, other_pubkey)
-
-    dm = PartialDirectMessage(
-        event_id=dm_event.id,
-        event_created_at=dm_event.created_at,
-        message=dm_content,
-        public_key=other_pubkey,
-        type=type_,
-    )
-    dm_reply = await create_direct_message(nostracct.id, dm)
-
-    await nostr_client.publish_nostr_event(dm_event)
-
-    await websocket_updater(
-        nostracct.id,
-        json.dumps(
-            {
-                "type": f"dm:{dm.type}",
-                "peerPubkey": other_pubkey,
-                "dm": dm_reply.dict(),
-            }
-        ),
-    )
+# TODO: not used anymore. this seemed to be a way previously to send internal messages
+# async def send_dm(
+#     nostracct: NostrAcct,
+#     other_pubkey: str,
+#     type_: int,
+#     dm_content: str,
+#     event_id: Optional[str] = None,
+#     event_created_at: Optional[int] = None,
+# ):
+#     # If event_id and created_at not provided, create new event
+#     if not event_id or not event_created_at:
+#         dm_event = nostracct.build_dm_event(dm_content, other_pubkey)
+#         event_id = dm_event.id
+#         event_created_at = dm_event.created_at
+#     else:
+#         # Use provided values for local message
+#         dm_event = NostrEvent(
+#             id=event_id,
+#             pubkey=nostracct.public_key,
+#             created_at=event_created_at,
+#             kind=4,
+#             tags=[["p", other_pubkey]],
+#             content=nostracct.encrypt_message(dm_content, other_pubkey)
+#         )
+#         dm_event.sig = nostracct.sign_hash(bytes.fromhex(dm_event.id))
+#
+#     dm = PartialDirectMessage(
+#         event_id=event_id,
+#         event_created_at=event_created_at,
+#         message=dm_content,
+#         public_key=other_pubkey,
+#         type=type_,
+#     )
+#     dm_reply = await create_direct_message(nostracct.id, dm)
+#
+#     await nostr_client.publish_nostr_event(dm_event)
+#
+#     await websocket_updater(
+#         nostracct.id,
+#         json.dumps(
+#             {
+#                 "type": f"dm:{dm.type}",
+#                 "peerPubkey": other_pubkey,
+#                 "dm": dm_reply.dict(),
+#             }
+#         ),
+#     )
 
 
 async def process_nostr_message(msg: str):
