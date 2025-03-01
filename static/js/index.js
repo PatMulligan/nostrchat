@@ -199,7 +199,7 @@ window.app = Vue.createApp({
         this.wsConnection.addEventListener('message', async ({ data }) => {
           const parsedData = JSON.parse(data)
           if (parsedData.type === 'dm:-1') {
-            await this.$refs.directMessagesRef.handleNewMessage(parsedData)
+            await this.$refs.chatBoxRef.handleNewMessage(parsedData)
           }
         })
       } catch (error) {
@@ -278,8 +278,8 @@ window.app = Vue.createApp({
       this.activePublicKey = publicKey
       // Add a slight delay to ensure the DOM has updated
       this.$nextTick(() => {
-        if (this.$refs.directMessagesRef) {
-          this.$refs.directMessagesRef.focusMessageInput()
+        if (this.$refs.chatBoxRef) {
+          this.$refs.chatBoxRef.focusMessageInput()
         }
       })
     },
