@@ -20,7 +20,9 @@ window.app = Vue.createApp({
       showAddPeer: false,
       newPeerKey: null,
       isMobileView: false,
-      windowHeight: window.innerHeight - 120
+      windowHeight: window.innerHeight - 120,
+      peerRefreshTimeout: null,
+      peerRefreshInProgress: false
     }
   },
 
@@ -223,6 +225,19 @@ window.app = Vue.createApp({
     },
 
     async getPeers() {
+      // Cancel any pending refresh
+      if (this.peerRefreshTimeout) {
+        clearTimeout(this.peerRefreshTimeout)
+        this.peerRefreshTimeout = null
+      }
+      
+      // If a refresh is already in progress, schedule another one for later
+      if (this.peerRefreshInProgress) {
+        this.peerRefreshTimeout = setTimeout(() => this.getPeers(), 500)
+        return
+      }
+      
+      this.peerRefreshInProgress = true
       try {
         const { data } = await LNbits.api.request(
           'GET',
@@ -232,6 +247,8 @@ window.app = Vue.createApp({
         this.peers = data
       } catch (error) {
         LNbits.utils.notifyApiError(error)
+      } finally {
+        this.peerRefreshInProgress = false
       }
     },
 
@@ -266,7 +283,10 @@ window.app = Vue.createApp({
     },
 
     refreshPeers() {
-      this.getPeers()
+      if (this.peerRefreshTimeout) {
+        clearTimeout(this.peerRefreshTimeout)
+      }
+      this.peerRefreshTimeout = setTimeout(() => this.getPeers(), 300)
     },
 
     handleResize() {

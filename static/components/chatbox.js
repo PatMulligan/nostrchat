@@ -29,7 +29,8 @@ window.app.component('chatbox', {
     return {
       messages: [],
       newMessage: '',
-      loading: false
+      loading: false,
+      lastRefreshTime: 0
     }
   },
 
@@ -123,7 +124,13 @@ window.app.component('chatbox', {
           })
         }
       }
-      this.$emit('refresh-peers')
+      
+      // Throttle refresh-peers events to at most once per second
+      const now = Date.now()
+      if (now - this.lastRefreshTime > 1000) {
+        this.lastRefreshTime = now
+        this.$emit('refresh-peers')
+      }
     },
 
     scrollToBottom() {
