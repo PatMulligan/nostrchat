@@ -113,10 +113,15 @@ window.app.component('chatbox', {
 
     handleNewMessage(data) {
       if (data.peerPubkey === this.activePublicKey) {
-        this.messages.push(data.dm)
-        this.$nextTick(() => {
-          this.scrollToBottom()
-        })
+        // Check if this message already exists in our messages array
+        const messageExists = this.messages.some(msg => msg.event_id === data.dm.event_id)
+        
+        if (!messageExists) {
+          this.messages.push(data.dm)
+          this.$nextTick(() => {
+            this.scrollToBottom()
+          })
+        }
       }
       this.$emit('refresh-peers')
     },

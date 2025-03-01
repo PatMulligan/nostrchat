@@ -160,11 +160,40 @@ window.app = Vue.createApp({
       if (!this.nostracct) return
 
       try {
+        // Close existing connection if it exists
+        if (this.wsConnection) {
+          if (this.wsConnection.readyState === WebSocket.OPEN || 
+              this.wsConnection.readyState === WebSocket.CONNECTING) {
+            // Connection exists and is either open or connecting, no need to create a new one
+            return
+          } else {
+            // Connection exists but is closing or closed, clean it up
+            this.wsConnection.close()
+            this.wsConnection = null
+          }
+        }
+
         const scheme = location.protocol === 'http:' ? 'ws' : 'wss'
         const port = location.port ? `:${location.port}` : ''
         const wsUrl = `${scheme}://${document.domain}${port}/api/v1/ws/${this.nostracct.id}`
 
+        console.log("Connecting to notifications at:", wsUrl)
         this.wsConnection = new WebSocket(wsUrl)
+        
+        this.wsConnection.addEventListener('open', () => {
+          console.log("WebSocket connection established")
+        })
+        
+        this.wsConnection.addEventListener('close', () => {
+          console.log("WebSocket connection closed")
+          // Don't immediately reconnect here - let the interval handle it
+        })
+        
+        this.wsConnection.addEventListener('error', (error) => {
+          console.error("WebSocket error:", error)
+          this.wsConnection = null // Clear reference on error
+        })
+        
         this.wsConnection.addEventListener('message', async ({ data }) => {
           const parsedData = JSON.parse(data)
           if (parsedData.type === 'dm:-1') {
@@ -172,6 +201,8 @@ window.app = Vue.createApp({
           }
         })
       } catch (error) {
+        console.error("WebSocket connection error:", error)
+        this.wsConnection = null
         LNbits.utils.notifyError('Failed to watch for updates')
       }
     },
@@ -248,14 +279,31 @@ window.app = Vue.createApp({
   created() {
     this.getNostrAcct()
     window.addEventListener('resize', this.handleResize)
-    setInterval(() => {
-      if (!this.wsConnection || this.wsConnection.readyState !== WebSocket.OPEN) {
+    
+    // Check connection status every 5 seconds instead of every second
+    this.wsCheckInterval = setInterval(() => {
+      if (!this.nostracct) return
+      
+      if (!this.wsConnection || 
+          this.wsConnection.readyState === WebSocket.CLOSED || 
+          this.wsConnection.readyState === WebSocket.CLOSING) {
+        console.log("WebSocket reconnecting...")
         this.waitForNotifications()
       }
-    }, 1000)
+    }, 5000) // Check every 5 seconds instead of every 1 second
   },
 
-  beforeUnmount() {
+  beforeDestroy() {
+    // Clean up interval and connection when component is destroyed
+    if (this.wsCheckInterval) {
+      clearInterval(this.wsCheckInterval)
+    }
+    
+    if (this.wsConnection) {
+      this.wsConnection.close()
+      this.wsConnection = null
+    }
+    
     window.removeEventListener('resize', this.handleResize)
   },
 
