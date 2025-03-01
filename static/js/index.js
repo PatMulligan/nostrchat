@@ -22,7 +22,8 @@ window.app = Vue.createApp({
       isMobileView: false,
       windowHeight: window.innerHeight - 120,
       peerRefreshTimeout: null,
-      peerRefreshInProgress: false
+      peerRefreshInProgress: false,
+      pendingMessages: []
     }
   },
 
@@ -199,7 +200,14 @@ window.app = Vue.createApp({
         this.wsConnection.addEventListener('message', async ({ data }) => {
           const parsedData = JSON.parse(data)
           if (parsedData.type === 'dm:-1') {
-            await this.$refs.chatBoxRef.handleNewMessage(parsedData)
+            if (this.$refs.chatBoxRef) {
+              // If chatbox is available, handle the message directly
+              await this.$refs.chatBoxRef.handleNewMessage(parsedData)
+            } else {
+              // Otherwise, queue the message for later processing
+              console.log("Queueing message for later processing", parsedData)
+              this.pendingMessages.push(parsedData)
+            }
           }
         })
       } catch (error) {
@@ -298,6 +306,20 @@ window.app = Vue.createApp({
     handleResize() {
       // Update window height when the viewport changes (e.g., keyboard appears)
       this.windowHeight = window.innerHeight - 120
+    },
+
+    processPendingMessages() {
+      if (!this.$refs.chatBoxRef || this.pendingMessages.length === 0) return
+      
+      console.log(`Processing ${this.pendingMessages.length} pending messages`)
+      
+      // Process all pending messages
+      this.pendingMessages.forEach(async (message) => {
+        await this.$refs.chatBoxRef.handleNewMessage(message)
+      })
+      
+      // Clear the queue
+      this.pendingMessages = []
     }
   },
 
@@ -340,6 +362,14 @@ window.app = Vue.createApp({
         if (newVal) {
           this.getPeers()
         }
+      }
+    },
+    activePublicKey: {
+      handler() {
+        // Give Vue time to render the chatbox component
+        this.$nextTick(() => {
+          this.processPendingMessages()
+        })
       }
     }
   }
