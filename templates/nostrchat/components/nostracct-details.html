@@ -64,52 +64,7 @@
         header-class="text-primary"
       >
         <q-card-section>
-          <!-- Header with dropdown -->
-          <!-- Key Information Section -->
           <div class="row q-col-gutter-md">
-          <!-- QR Codes Section (conditionally shown) -->
-          <div class="row q-col-gutter-md q-mb-md">
-            <div class="col-12 col-md-6 text-center">
-              <div class="text-subtitle1 text-primary q-mb-sm">npub QR</div>
-              <div class="cursor-pointer" @click="copyText(npub, 'Public key (npub) copied!')">
-                <lnbits-qrcode
-                  :value="npub"
-                  :options="{width: isMobile ? 150 : 200}"
-                  class="rounded-borders"
-                ></lnbits-qrcode>
-              </div>
-            </div>
-            <div class="col-12 col-md-6 text-center">
-              <div class="text-subtitle1 text-primary q-mb-sm">nsec QR</div>
-              <div v-if="showPrivateKeyQr" class="cursor-pointer">
-                <div @click="copyText(nsec, 'Private key (nsec) copied!')" class="relative-position">
-                  <lnbits-qrcode
-                    :value="nsec"
-                    :options="{width: isMobile ? 150 : 200}"
-                    class="rounded-borders"
-                  ></lnbits-qrcode>
-                </div>
-              </div>
-              <div v-else class="flex flex-center" style="height: 200px">
-                <q-btn
-                  color="primary"
-                  icon="visibility"
-                  label="Show Private Key QR"
-                  @click="showPrivateKeyQr = true"
-                />
-              </div>
-                  <q-btn v-if="showPrivateKeyQr"
-                    flat
-                    dense
-                    color="negative"
-                    icon="visibility_off"
-                    @click.stop="showPrivateKeyQr = false"
-                    class="q-ma-xs"
-                  >
-                    <q-tooltip>Hide Private Key QR</q-tooltip>
-                  </q-btn>
-            </div>
-          </div>
             <!-- Public Key Section -->
             <div class="col-12 col-md-6">
               <div class="text-subtitle1 text-primary q-mb-sm">Public Key</div>
@@ -122,11 +77,29 @@
                 class="q-mb-sm mobile-input"
               >
                 <template v-slot:append>
+                  <q-btn flat dense icon="qr_code" @click="toggleQrCode('npub')" class="q-mr-xs">
+                    <q-tooltip>Show QR Code</q-tooltip>
+                  </q-btn>
                   <q-btn flat dense icon="content_copy" @click="copyText(npub, 'Public key (npub) copied!')">
                     <q-tooltip>Copy npub</q-tooltip>
                   </q-btn>
                 </template>
               </q-input>
+              
+              <!-- QR Code for npub (conditionally shown) -->
+              <div v-if="activeQrCode === 'npub'" class="text-center q-my-md">
+                <lnbits-qrcode
+                  :value="npub"
+                  :options="{width: isMobile ? 150 : 200}"
+                  class="rounded-borders cursor-pointer"
+                  @click="copyText(npub, 'Public key (npub) copied!')"
+                ></lnbits-qrcode>
+                <div class="q-mt-xs">
+                  <q-btn flat dense color="negative" icon="close" @click="activeQrCode = null">
+                    <q-tooltip>Hide QR Code</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
 
               <q-input
                 v-model="publicKey"
@@ -137,16 +110,34 @@
                 class="mobile-input"
               >
                 <template v-slot:append>
+                  <q-btn flat dense icon="qr_code" @click="toggleQrCode('pubHex')" class="q-mr-xs">
+                    <q-tooltip>Show QR Code</q-tooltip>
+                  </q-btn>
                   <q-btn flat dense icon="content_copy" @click="copyText(publicKey, 'Public key (hex) copied!')">
                     <q-tooltip>Copy hex</q-tooltip>
                   </q-btn>
                 </template>
               </q-input>
+              
+              <!-- QR Code for pubHex (conditionally shown) -->
+              <div v-if="activeQrCode === 'pubHex'" class="text-center q-my-md">
+                <lnbits-qrcode
+                  :value="publicKey"
+                  :options="{width: isMobile ? 150 : 200}"
+                  class="rounded-borders cursor-pointer"
+                  @click="copyText(publicKey, 'Public key (hex) copied!')"
+                ></lnbits-qrcode>
+                <div class="q-mt-xs">
+                  <q-btn flat dense color="negative" icon="close" @click="activeQrCode = null">
+                    <q-tooltip>Hide QR Code</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
             </div>
 
             <!-- Private Key Section -->
             <div class="col-12 col-md-6">
-              <div class="text-subtitle1 text-primary q-mb-sm">Private Key</div>
+              <div class="text-subtitle1 text-primary q-mb-sm">Private Key<q-icon name="lock" class="q-ml-sm text-negative"></q-icon></div>
               <q-input
                 v-model="nsec"
                 readonly
@@ -156,15 +147,31 @@
                 class="q-mb-sm mobile-input"
               >
                 <template v-slot:append>
-                  <q-btn flat dense :icon="showPrivateKeyText ? 'visibility_off' : 'visibility'" 
-                        @click="showPrivateKeyText = !showPrivateKeyText" class="q-mr-xs">
-                    <q-tooltip v-text="showPrivateKeyText ? 'Hide' : 'Show'"></q-tooltip>
+                  <q-btn flat dense icon="qr_code" @click="toggleQrCode('nsec')" class="q-mr-xs">
+                    <q-tooltip>Show QR Code</q-tooltip>
                   </q-btn>
                   <q-btn flat dense icon="content_copy" @click="copyText(nsec, 'Private key (nsec) copied!')">
                     <q-tooltip>Copy nsec</q-tooltip>
                   </q-btn>
                 </template>
               </q-input>
+              
+              <!-- QR Code for nsec (conditionally shown) -->
+              <div v-if="activeQrCode === 'nsec'" class="text-center q-my-md">
+                <div class="relative-position">
+                  <lnbits-qrcode
+                    :value="nsec"
+                    :options="{width: isMobile ? 150 : 200}"
+                    class="rounded-borders cursor-pointer"
+                    @click="copyText(nsec, 'Private key (nsec) copied!')"
+                  ></lnbits-qrcode>
+                  <div class="q-mt-xs">
+                    <q-btn flat dense color="negative" icon="close" @click="activeQrCode = null">
+                      <q-tooltip>Hide QR Code</q-tooltip>
+                    </q-btn>
+                  </div>
+                </div>
+              </div>
 
               <q-input
                 v-model="privateKey"
@@ -175,14 +182,37 @@
                 class="mobile-input"
               >
                 <template v-slot:append>
+                  <q-btn flat dense icon="qr_code" @click="toggleQrCode('privHex')" class="q-mr-xs">
+                    <q-tooltip>Show QR Code</q-tooltip>
+                  </q-btn>
                   <q-btn flat dense icon="content_copy" @click="copyText(privateKey, 'Private key (hex) copied!')">
                     <q-tooltip>Copy hex</q-tooltip>
                   </q-btn>
                 </template>
               </q-input>
+              
+              <!-- QR Code for privHex (conditionally shown) -->
+              <div v-if="activeQrCode === 'privHex'" class="text-center q-my-md">
+                <lnbits-qrcode
+                  :value="privateKey"
+                  :options="{width: isMobile ? 150 : 200}"
+                  class="rounded-borders cursor-pointer"
+                  @click="copyText(privateKey, 'Private key (hex) copied!')"
+                ></lnbits-qrcode>
+                <div class="q-mt-xs">
+                  <q-btn flat dense color="negative" icon="close" @click="activeQrCode = null">
+                    <q-tooltip>Hide QR Code</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
+              <div class="text-center q-my-md">
+                <q-btn flat dense :icon="showPrivateKeyText ? 'visibility_off' : 'visibility'" 
+                      @click="showPrivateKeyText = !showPrivateKeyText" class="q-mr-xs">
+                  <q-tooltip v-text="showPrivateKeyText ? 'Hide' : 'Show'"></q-tooltip>
+                </q-btn>
+              </div>
             </div>
           </div>
-
         </q-card-section>
       </q-expansion-item>
 

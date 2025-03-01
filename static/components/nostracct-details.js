@@ -31,7 +31,7 @@ window.app.component('nostracct-details', {
   data: function () {
     return {
       showPrivateKeyText: false,
-      showPrivateKeyQr: false,
+      activeQrCode: null,
       loading: false,
       savingProfile: false,
       profile: {
@@ -224,6 +224,13 @@ window.app.component('nostracct-details', {
             this.loading = false
           }
         })
+    },
+    toggleQrCode(codeType) {
+      if (this.activeQrCode === codeType) {
+        this.activeQrCode = null;
+      } else {
+        this.activeQrCode = codeType;
+      }
     }
   },
   created() {
